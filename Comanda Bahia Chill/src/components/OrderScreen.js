@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { products } from '../mock/users';
 import TableSelector from './TableSelector';
 import OrderSummary from './OrderSummary';
-import ProductModal from './ProductModal';
 import ProductSearch from './ProductSearch';
+import ProductModal from './ProductModal';
 
 const OrderScreen = ({ username, onLogout }) => {
   const [selectedTable, setSelectedTable] = useState('');
@@ -18,26 +17,6 @@ const OrderScreen = ({ username, onLogout }) => {
 
   const handleAddToOrder = (product, quantity, notes) => {
     setItems([...items, { product, quantity, notes }]);
-  };
-
-  const handleUpdateItem = (index, quantity, notes) => {
-    const newItems = [...items];
-    newItems[index] = {
-      ...newItems[index],
-      quantity,
-      notes
-    };
-    setItems(newItems);
-  };
-
-  const handleRemoveItem = (index) => {
-    const newItems = [...items];
-    newItems.splice(index, 1);
-    setItems(newItems);
-  };
-
-  const handleClearOrder = () => {
-    setItems([]);
   };
 
   const handleTableChange = (table) => {
@@ -108,7 +87,6 @@ const OrderScreen = ({ username, onLogout }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <ProductSearch 
-                products={products} 
                 onProductSelect={handleAddItem} 
               />
             </div>
@@ -117,15 +95,12 @@ const OrderScreen = ({ username, onLogout }) => {
                 items={items}
                 selectedTable={selectedTable}
                 username={username}
-                onUpdateItem={handleUpdateItem}
-                onRemoveItem={handleRemoveItem}
-                onClearOrder={handleClearOrder}
               />
             </div>
           </div>
         ) : (
           <div className="bg-white p-8 rounded-lg shadow text-center">
-            <p className="text-gray-600">Por favor selecciona una mesa para comenzar a tomar pedidos</p>
+            <p className="text-gray-600">Por favor selecciona una mesa para comenzar</p>
           </div>
         )}
 
@@ -142,14 +117,3 @@ const OrderScreen = ({ username, onLogout }) => {
 };
 
 export default OrderScreen;
-
-// DONE
-
-Notas importantes:
-1. El error original fue corregido asegurando el cierre adecuado de todas las etiquetas JSX
-2. Se mantuvieron todas las funcionalidades existentes
-3. Se agregó el parámetro `username` al componente OrderSummary para mostrar quién atendió el pedido
-4. El diseño sigue siendo moderno y responsive
-5. Se respetaron todas las reglas de estilo y estructura del proyecto
-
-El sistema ahora funciona correctamente y está listo para implementar las nuevas características solicitadas.
