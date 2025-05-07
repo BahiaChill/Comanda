@@ -3,6 +3,7 @@ import TableSelector from './TableSelector';
 import OrderSummary from './OrderSummary';
 import ProductSearch from './ProductSearch';
 import ProductModal from './ProductModal';
+import { products } from '../users';
 
 const OrderScreen = ({ username, onLogout }) => {
   const [selectedTable, setSelectedTable] = useState('');
@@ -84,12 +85,13 @@ const OrderScreen = ({ username, onLogout }) => {
         )}
 
         {selectedTable ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <ProductSearch 
-                onProductSelect={handleAddItem} 
-              />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <ProductSearch 
+              products={products}
+              onProductSelect={handleAddItem} 
+            />
+          </div>
             <div>
               <OrderSummary
                 items={items}
