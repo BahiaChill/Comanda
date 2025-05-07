@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 const ProductSearch = ({ products, onProductSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const filteredProducts = (products || []).filter(...);
 
   const filteredProducts = (products || []).filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
