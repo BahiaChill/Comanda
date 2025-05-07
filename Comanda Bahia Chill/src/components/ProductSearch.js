@@ -4,7 +4,7 @@ const ProductSearch = ({ products, onProductSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
-  const filteredProducts = products.filter(product =>
+  const filteredProducts = (products || []).filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
