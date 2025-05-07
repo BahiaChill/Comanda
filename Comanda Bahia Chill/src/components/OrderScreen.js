@@ -3,7 +3,7 @@ import TableSelector from './TableSelector';
 import OrderSummary from './OrderSummary';
 import ProductSearch from './ProductSearch';
 import ProductModal from './ProductModal';
-import { products } from '../users';
+import { users, products } from './users';
 
 const OrderScreen = ({ username, onLogout }) => {
   const [selectedTable, setSelectedTable] = useState('');
