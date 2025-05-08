@@ -1422,49 +1422,49 @@
                 }).toUpperCase();
                 
                 // Create receipt content
-                receiptContent.innerHTML = `
-                    <div class="receipt-container">
-                        <div class="receipt-header">
-                            <h1 class="receipt-title">BAHIA CHILL</h1>
-                            <div class="receipt-subheader">
-                                <p>Comanda Digital</p>
-                                <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
-                            </div>
-                            <div class="receipt-meta">
-                                <p>${formattedDate} - ${formattedTime}</p>
-                                <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
-                                <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
-                            </div>
-                        </div>
-                                            
-                        <table class="w-full mb-4">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="text-left py-2 text-sm font-medium">Producto</th>
-                                    <th class="text-right py-2 text-sm font-medium">Cant.</th>
-                                    <th class="text-right py-2 text-sm font-medium">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${currentOrder.map(item => `
-                                    <tr class="border-b border-gray-100">
-                                        <td class="py-2 text-sm">
-                                            ${item.product.name}
-                                            ${item.notes ? `<br><span class="text-xs text-gray-500">${item.notes}</span>` : ''}
-                                        </td>
-                                        <td class="text-right py-2 text-sm">${item.quantity}</td>
-                                        <td class="text-right py-2 text-sm">$${(item.product.price * item.quantity).toLocaleString()}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                                            
-                        <div class="border-t border-gray-200 pt-3">
-                            <div class="flex justify-between font-semibold text-lg">
-                                <span>Total:</span>
-                                <span>$${total.toLocaleString()}</span>
-                            </div>
-                        </div>
+receiptContent.innerHTML = `
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <h1 class="receipt-title text-black">BAHIA CHILL</h1> <!-- Añadido text-black -->
+            <div class="receipt-subheader">
+                <p class="text-black">Comanda Digital</p> <!-- Añadido text-black -->
+                <p class="company-info text-black">Bahia Chill S.A.S | NIT: 123456789-0</p> <!-- Añadido text-black -->
+            </div>
+            <div class="receipt-meta text-black"> <!-- Añadido text-black -->
+                <p>${formattedDate} - ${formattedTime}</p>
+                <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
+                <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
+            </div>
+        </div>
+                        
+        <table class="w-full mb-4">
+            <thead>
+                <tr class="border-b border-gray-200">
+                    <th class="text-left py-2 text-sm font-medium text-black">Producto</th> <!-- Añadido text-black -->
+                    <th class="text-right py-2 text-sm font-medium text-black">Cant.</th> <!-- Añadido text-black -->
+                    <th class="text-right py-2 text-sm font-medium text-black">Total</th> <!-- Añadido text-black -->
+                </tr>
+            </thead>
+            <tbody>
+                ${currentOrder.map(item => `
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 text-sm text-black"> <!-- Añadido text-black -->
+                            ${item.product.name}
+                            ${item.notes ? `<br><span class="text-xs text-black">${item.notes}</span>` : ''} <!-- Cambiado text-gray-500 a text-black -->
+                        </td>
+                        <td class="text-right py-2 text-sm text-black">${item.quantity}</td> <!-- Añadido text-black -->
+                        <td class="text-right py-2 text-sm text-black">$${(item.product.price * item.quantity).toLocaleString()}</td> <!-- Añadido text-black -->
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+                        
+        <div class="border-t border-gray-200 pt-3">
+            <div class="flex justify-between font-semibold text-lg text-black"> <!-- Añadido text-black -->
+                <span>Total:</span>
+                <span>$${total.toLocaleString()}</span>
+            </div>
+        </div>
                                             
                         ${customerName.value || customerId.value || customerContact.value ? `
                         <div class="mt-6 border-t border-gray-200 pt-4">
