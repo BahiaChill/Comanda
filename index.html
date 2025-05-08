@@ -916,6 +916,12 @@
 
         // Initialize the app
         function init() {
+            document.getElementById('logout-cancel').addEventListener('click', () => {
+    document.getElementById('logout-modal').classList.add('hidden');
+});
+
+document.getElementById('logout-confirm').addEventListener('click', () => {
+    document.getElementById('logout-modal').classList.add('hidden');
             // Password input dots
             updatePasswordDots();
             
