@@ -1369,19 +1369,26 @@
         }
 
         // Clear order
-        function clearOrder() {
-            if (currentOrder.length === 0) return;
-            
-            if (confirm('¿Está seguro de limpiar el pedido actual?')) {
-                orderItems.classList.add('order-item-remove');
-                
-                setTimeout(() => {
-                    currentOrder = [];
-                    updateOrderSummary();
-                    orderItems.classList.remove('order-item-remove');
-                }, 300);
-            }
-        }
+        
+function clearOrder() {
+    if (currentOrder.length === 0) return;
+    
+    if (confirm('¿Está seguro de limpiar el pedido actual?')) {
+        // Limpiar datos del cliente
+        customerName.value = "";
+        customerIdType.selectedIndex = 0;
+        customerId.value = "";
+        customerContact.value = "";
+        
+        orderItems.classList.add('order-item-remove');
+        
+        setTimeout(() => {
+            currentOrder = [];
+            updateOrderSummary();
+            orderItems.classList.remove('order-item-remove');
+        }, 300);
+    }
+}
 
         // Show receipt
         function showReceipt() {
