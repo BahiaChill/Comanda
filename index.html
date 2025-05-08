@@ -1502,6 +1502,21 @@ receiptContent.innerHTML = `
             deviceModal.classList.remove('hidden');
             selectedDevice = null;
         }
+<div id="logout-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-80 fade-in">
+        <div class="text-center mb-4">
+            <p class="text-gray-700">¿Seguro que quieres salir?</p>
+        </div>
+        <div class="flex justify-center space-x-4">
+            <button id="logout-cancel" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                Cancelar
+            </button>
+            <button id="logout-confirm" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90">
+                Salir
+            </button>
+        </div>
+    </div>
+</div>
 
         // Download receipt as PDF
         function downloadReceipt() {
