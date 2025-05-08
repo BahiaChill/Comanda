@@ -1052,6 +1052,8 @@
 
         // Handle logout
         function handleLogout() {
+    document.getElementById('logout-modal').classList.remove('hidden');
+}
             // Clear all data
             currentUser = null;
             currentTable = null;
