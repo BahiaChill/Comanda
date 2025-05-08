@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comanda Digital Bahia Chill</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f8ff;
+        }
+        
+        .logo {
+            color: white;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .bg-primary {
+            background-color: #3d819d;
+        }
+        
+        .text-primary {
+            color: #3d819d;
+        }
+        
+        .border-primary {
+            border-color: #3d819d;
+        }
+        
+        .btn-primary {
+            background-color: #3d819d;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2c6b85;
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .password-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: white;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Custom dropdown style */
+        .custom-select {
+            position: relative;
+            width: 100%;
+        }
+        
+        .custom-select select {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 100%;
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: white;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .custom-select::after {
+            content: "▼";
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            color: #6b7280;
+            pointer-events: none;
+        }
+        
+        /* Search highlight */
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        /* Disabled state */
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        /* Receipt modal */
+        .receipt-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        
+        .receipt-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        /* Search results dropdown */
+        .search-results {
+            position: absolute;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+            margin-top: 2px;
+        }
+        
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Custom styles for buttons */
+        .btn-secondary {
+            background-color: #f0f8ff;
+            color: #3d819d;
+            border: 1px solid #3d819d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0f0ff;
+        }
+        
+        .btn-danger {
+            background-color: #f87171;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #ef4444;
+        }
+        
+        /* Login screen styles */
+        .login-container {
+            background-color: #3d819d;
+            color: white;
+        }
+        
+        .login-input {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .login-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .login-input:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            outline: none;
+            border-color: white;
+        }
+        
+        .login-btn {
+            background-color: white;
+            color: #3d819d;
+        }
+        
+        .login-btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .login-select {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .login-select option {
+            background-color: #3d819d;
+            color: white;
+        }
+        
+        /* Password toggle eye */
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: white;
+        }
+        
+        /* Order item animation */
+        .order-item-animation {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Remove animation */
+        .order-item-remove {
+            animation: slideOut 0.3s ease-out;
+        }
+        
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+        
+        /* Pulse animation */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 0.5s;
+        }
+        
+        /* Receipt styles */
+        .receipt-header {
+            background-color: #3d819d;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        
+        .receipt-footer {
+            background-color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0 0 0.5rem 0.5rem;
+            text-align: center;
+        }
+        
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receipt-content, #receipt-content * {
+                visibility: visible;
+            }
+            #receipt-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                margin: 0;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Receipt specific styles */
+        .receipt-container {
+            width: 100%;
+            max-width: 80mm;
+            padding: 5px;
+            background: white;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px solid #3d819d;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .receipt-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #3d819d;
+            margin: 0;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .company-info {
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .receipt-subheader p:first-child {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 5px;
+        }
+
+        .receipt-meta {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .receipt-footer {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        .footer-text {
+            font-weight: 700;
+            color: #333;
+            line-height: 1.4;
+            letter-spacing: 0.5px;
+        }
+
+        /* PDF button styles */
+        .pdf-btn {
+            min-width: 48px;
+            min-height: 48px;
+            padding: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pdf-btn:active {
+            transform: scale(0.95);
+            transition: transform 0.1s;
+        }
+
+        /* Two column layout for long lists */
+        .two-columns {
+            column-count: 2;
+            column-gap: 15px;
+        }
+
+        /* Device selection modal */
+        .device-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .device-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            max-width: 400px;
+            width: 100%;
+            padding: 1.5rem;
+        }
+
+        .device-option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .device-option:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .device-option i {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            color: #3d819d;
+        }
+
+        .device-option-text {
+            flex: 1;
+        }
+
+        .device-option-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .device-option-desc {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .receipt-container {
+                width: 80mm !important;
+                max-width: 80mm !important;
+                padding: 5px !important;
+                font-size: 10px !important;
+            }
+            
+            .receipt-title {
+                font-size: 18px !important;
+            }
+            
+            .two-columns {
+                column-count: 1 !important;
+            }
+        }
+
+        /* Pagination indicator */
+        .page-indicator {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 10px;
+            color: #666;
+            background-color: rgba(255,255,255,0.8);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex flex-col items-center justify-center min-h-screen p-4 login-container">
+        <div class="w-full max-w-md rounded-lg shadow-md overflow-hidden fade-in">
+            <div class="py-8 px-8 text-center">
+                <h1 class="text-3xl font-bold text-white">BAHIA CHILL</h1>
+                <p class="text-white opacity-90 mt-1">Comanda Digital</p>
+            </div>
+            
+            <div class="p-8">
+                <div class="mb-6">
+                    <label for="username" class="block text-white text-sm font-medium mb-2">Usuario</label>
+                    <select id="username" class="w-full px-4 py-2 login-select rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+                        <option value="" disabled selected class="text-gray-700">Seleccione un usuario</option>
+                        <option value="JUAN">JUAN</option>
+                        <option value="SANTIAGO">SANTIAGO</option>
+                        <option value="SOFIA">SOFIA</option>
+                        <option value="JULIAN">JULIAN</option>
+                        <option value="INVITADO">INVITADO</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="password" class="block text-white text-sm font-medium mb-2">Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="password" maxlength="4" inputmode="numeric" class="w-full px-4 py-2 login-input rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent" placeholder="••••">
+                        <i id="toggle-password" class="password-toggle fas fa-eye"></i>
+                        <div id="password-dots" class="absolute right-10 top-1/2 transform -translate-y-1/2 flex">
+                            <!-- Dots will be added here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="login-btn" class="w-full login-btn py-2 px-4 rounded-md font-medium transition duration-200 flex items-center justify-center">
+                    <span id="login-text">Ingresar</span>
+                    <div id="login-spinner" class="spinner ml-2 hidden"></div>
+                </button>
+                
+                <div id="login-error" class="mt-4 text-red-300 text-sm text-center hidden">
+                    Credenciales incorrectas. Intente nuevamente.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Screen (Hidden by default) -->
+    <div id="app-screen" class="hidden min-h-screen">
+        <!-- Header -->
+        <header class="bg-primary text-white py-4 px-6 shadow-md">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold">BAHIA CHILL</h1>
+                    <span class="ml-2 text-sm opacity-80">Comanda Digital</span>
+                </div>
+                <div class="flex items-center">
+                    <span id="current-user" class="mr-4 text-sm font-medium"></span>
+                    <button id="logout-btn" class="bg-white text-primary py-1 px-3 rounded text-sm font-medium hover:bg-opacity-90 transition duration-200">
+                        Salir
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="p-4">
+            <!-- Table Selection -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">Seleccione una mesa</h2>
+                <div class="custom-select">
+                    <select id="table-select" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="" disabled selected>Seleccione una mesa</option>
+                        <option value="1">Mesa 1</option>
+                        <option value="2">Mesa 2</option>
+                        <option value="3">Mesa 3</option>
+                        <option value="4">Mesa 4</option>
+                        <option value="5">Mesa 5</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Order Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Product Selection -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-gray-700">Menú</h2>
+                            <div class="relative w-full">
+                                <input type="text" id="product-search" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled" placeholder="Buscar producto..." disabled>
+                                <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                <div id="search-results" class="search-results hidden"></div>
+                            </div>
+                        </div>
+                                                        
+                        <!-- Products Grid (Hidden now, only search results will show) -->
+                        <div id="products-grid" class="hidden">
+                            <!-- Products will be shown only in search results -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Order Summary -->
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-4 sticky top-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-gray-700">Resumen del Pedido</h2>
+                            <span id="current-table" class="px-2 py-1 bg-primary text-white text-sm rounded">Mesa no seleccionada</span>
+                        </div>
+                                                        
+                        <!-- Order Items -->
+                        <div id="order-items" class="mb-4 max-h-96 overflow-y-auto">
+                            <div class="text-center text-gray-500 py-4">
+                                No hay productos agregados
+                            </div>
+                        </div>
+                                                        
+                        <!-- Order Total -->
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between text-lg font-semibold">
+                                <span>Total:</span>
+                                <span id="total">$0</span>
+                            </div>
+                        </div>
+                                                        
+                        <!-- Customer Info -->
+                        <div class="mt-4">
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Datos del cliente (opcional)</h3>
+                            <input type="text" id="customer-name" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mb-2" placeholder="Nombre completo">
+                            <select id="customer-id-type" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mb-2">
+                                <option value="CC">Cédula</option>
+                                <option value="NIT">NIT</option>
+                                <option value="CE">Cédula extranjera</option>
+                            </select>
+                            <input type="text" id="customer-id" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mb-2" placeholder="Número de identificación">
+                            <input type="text" id="customer-contact" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Teléfono o correo">
+                        </div>
+                                                        
+                        <!-- Action Buttons -->
+                        <div class="mt-6 space-y-2">
+                            <button id="clear-order-btn" class="w-full py-2 px-4 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 transition duration-200">
+                                Limpiar Pedido
+                            </button>
+                            <button id="finalize-order-btn" class="w-full py-2 px-4 btn-primary rounded-md font-medium text-white hover:bg-opacity-90 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <span id="finalize-text">Finalizar Pedido</span>
+                                <div id="finalize-spinner" class="spinner ml-2 hidden"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal (Hidden by default) -->
+    <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 fade-in">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 id="modal-product-name" class="text-xl font-semibold text-gray-800"></h3>
+                    <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-700">Precio unitario:</span>
+                        <span id="modal-product-price" class="font-medium"></span>
+                    </div>
+                                    
+                    <div class="mb-4">
+                        <label for="product-quantity" class="block text-gray-700 mb-2">Cantidad</label>
+                        <div class="flex items-center">
+                            <button id="decrement-quantity" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-l-md hover:bg-gray-300">
+                                -
+                            </button>
+                            <input type="number" id="product-quantity" min="1" max="50" value="1" class="w-16 text-center border-t border-b border-gray-300 py-1">
+                            <button id="increment-quantity" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-r-md hover:bg-gray-300">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                                    
+                    <div>
+                        <label for="product-notes" class="block text-gray-700 mb-2">Notas especiales</label>
+                        <textarea id="product-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ej: Sin hielo, vaso adicional..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button id="cancel-modal-btn" class="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 transition duration-200">
+                        Cancelar
+                    </button>
+                    <button id="add-to-order-btn" class="flex-1 py-2 px-4 btn-primary rounded-md font-medium text-white hover:bg-opacity-90 transition duration-200">
+                        <span id="add-to-order-text">Agregar</span>
+                        <div id="add-to-order-spinner" class="spinner ml-2 hidden"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal (Hidden by default) -->
+    <div id="receipt-modal" class="receipt-modal hidden">
+        <div class="receipt-content">
+            <div class="receipt-header text-center">
+                <h1 class="text-2xl font-bold">BAHIA CHILL</h1>
+                <p class="text-sm opacity-90">Comanda Digital</p>
+            </div>
+            
+            <div class="p-6" id="receipt-content">
+                <!-- Receipt content will be inserted here -->
+            </div>
+            
+            <div class="receipt-footer">
+                <p class="text-sm text-gray-600">Gracias por su visita. ¡Vuelva pronto!</p>
+            </div>
+            
+            <div class="p-4 border-t border-gray-200 flex justify-between no-print">
+                <button id="print-receipt-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                    <i class="fas fa-print mr-2"></i>Imprimir
+                </button>
+                <button id="download-receipt-btn" class="pdf-btn px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90 flex items-center justify-center">
+                    <i class="fas fa-download mr-2"></i>
+                    <span class="hidden sm:inline">Descargar PDF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Selection Modal (Hidden by default) -->
+    <div id="device-modal" class="device-modal hidden">
+        <div class="device-content fade-in">
+            <h2 class="text-lg font-semibold mb-4 text-center">¿Desde qué dispositivo estás descargando?</h2>
+            
+            <div class="mb-4">
+                <div class="device-option" data-device="mobile">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div class="device-option-text">
+                        <div class="device-option-title">Celular</div>
+                        <div class="device-option-desc">Optimizado para pantallas verticales</div>
+                    </div>
+                </div>
+                
+                <div class="device-option" data-device="desktop">
+                    <i class="fas fa-desktop"></i>
+                    <div class="device-option-text">
+                        <div class="device-option-title">Computador</div>
+                        <div class="device-option-desc">Formato estándar horizontal</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="cancel-device-btn" class="w-full py-2 px-4 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 transition duration-200">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const users = [
+            { username: "JUAN", password: "7294" },
+            { username: "SANTIAGO", password: "3168" },
+            { username: "SOFIA", password: "4835" },
+            { username: "JULIAN", password: "1590" },
+            { username: "INVITADO", password: "6247" }
+        ];
+
+        const tables = [
+            { id: 1, label: "Mesa 1" },
+            { id: 2, label: "Mesa 2" },
+            { id: 3, label: "Mesa 3" },
+            { id: 4, label: "Mesa 4" },
+            { id: 5, label: "Mesa 5" }
+        ];
+
+        const products = [
+            { id: 1, name: "Aguila", price: 3500, category: "cerveza" },
+            { id: 2, name: "Poker", price: 3500, category: "cerveza" },
+            { id: 3, name: "Budwaiser", price: 3000, category: "cerveza" },
+            { id: 4, name: "Costena", price: 3000, category: "cerveza" },
+            { id: 5, name: "Coronita", price: 4000, category: "cerveza" },
+            { id: 6, name: "Corona", price: 8000, category: "cerveza" },
+            { id: 7, name: "Stella Artois", price: 8000, category: "cerveza" },
+            { id: 8, name: "1/2 Lider", price: 45000, category: "licor" },
+            { id: 9, name: "1 Lider", price: 85000, category: "licor" },
+            { id: 10, name: "1/2 Ron", price: 40000, category: "licor" },
+            { id: 11, name: "1 Ron", price: 80000, category: "licor" },
+            { id: 12, name: "Buchanan's", price: 220000, category: "licor" },
+            { id: 13, name: "Onix Negro", price: 80000, category: "licor" },
+            { id: 14, name: "Bacardi", price: 80000, category: "licor" },
+            { id: 15, name: "Onix Amarillo", price: 90000, category: "licor" },
+            { id: 16, name: "Cigarrillo", price: 1000, category: "otros" },
+            { id: 17, name: "Michelada", price: 2000, category: "coctel" },
+            { id: 18, name: "Agua", price: 3000, category: "bebida" },
+            { id: 19, name: "Cafe", price: 3000, category: "bebida" },
+            { id: 20, name: "Mani", price: 3000, category: "snack" },
+            { id: 21, name: "Coca Cola", price: 4000, category: "bebida" },
+            { id: 22, name: "Soda", price: 4000, category: "bebida" },
+            { id: 23, name: "Sprite", price: 4000, category: "bebida" },
+            { id: 24, name: "Ron con Cola", price: 28000, category: "coctel" },
+            { id: 25, name: "Pina Chill", price: 28000, category: "coctel" },
+            { id: 26, name: "Mojito", price: 28000, category: "coctel" },
+            { id: 27, name: "Vodka Martini", price: 40000, category: "coctel" },
+            { id: 28, name: "Pescera", price: 40000, category: "coctel" },
+            { id: 29, name: "Fuego de Bahia", price: 12000, category: "coctel" },
+            { id: 30, name: "Extasis Tropical", price: 12000, category: "coctel" },
+            { id: 31, name: "Seduccion Tropical", price: 12000, category: "coctel" },
+            { id: 32, name: "Mar de pasion", price: 12000, category: "coctel" },
+            { id: 33, name: "Atardecer Tropical", price: 12000, category: "coctel" },
+            { id: 34, name: "Naufragio", price: 12000, category: "coctel" },
+            { id: 35, name: "Brisa Acida", price: 12000, category: "coctel" },
+            { id: 36, name: "Tormenta Azul", price: 12000, category: "coctel" },
+            { id: 37, name: "Rayo Caribeno", price: 12000, category: "coctel" }
+        ];
+
+        // State
+        let currentUser = null;
+        let currentTable = null;
+        let currentOrder = [];
+        let currentProduct = null;
+        let editingIndex = null;
+        let pdfGenerationTimeout = null;
+        let selectedDevice = null;
+
+        // DOM Elements
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen = document.getElementById('app-screen');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const passwordDots = document.getElementById('password-dots');
+        const togglePassword = document.getElementById('toggle-password');
+        const loginBtn = document.getElementById('login-btn');
+        const loginText = document.getElementById('login-text');
+        const loginSpinner = document.getElementById('login-spinner');
+        const loginError = document.getElementById('login-error');
+        const logoutBtn = document.getElementById('logout-btn');
+        const currentUserSpan = document.getElementById('current-user');
+        const tableSelect = document.getElementById('table-select');
+        const currentTableSpan = document.getElementById('current-table');
+        const productsGrid = document.getElementById('products-grid');
+        const productSearch = document.getElementById('product-search');
+        const searchResults = document.getElementById('search-results');
+        const orderItems = document.getElementById('order-items');
+        const totalSpan = document.getElementById('total');
+        const clearOrderBtn = document.getElementById('clear-order-btn');
+        const finalizeOrderBtn = document.getElementById('finalize-order-btn');
+        const finalizeText = document.getElementById('finalize-text');
+        const finalizeSpinner = document.getElementById('finalize-spinner');
+        const productModal = document.getElementById('product-modal');
+        const modalProductName = document.getElementById('modal-product-name');
+        const modalProductPrice = document.getElementById('modal-product-price');
+        const productQuantity = document.getElementById('product-quantity');
+        const decrementQuantity = document.getElementById('decrement-quantity');
+        const incrementQuantity = document.getElementById('increment-quantity');
+        const productNotes = document.getElementById('product-notes');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const cancelModalBtn = document.getElementById('cancel-modal-btn');
+        const addToOrderBtn = document.getElementById('add-to-order-btn');
+        const addToOrderText = document.getElementById('add-to-order-text');
+        const addToOrderSpinner = document.getElementById('add-to-order-spinner');
+        const customerName = document.getElementById('customer-name');
+        const customerIdType = document.getElementById('customer-id-type');
+        const customerId = document.getElementById('customer-id');
+        const customerContact = document.getElementById('customer-contact');
+        const receiptModal = document.getElementById('receipt-modal');
+        const receiptContent = document.getElementById('receipt-content');
+        const downloadReceiptBtn = document.getElementById('download-receipt-btn');
+        const printReceiptBtn = document.getElementById('print-receipt-btn');
+        const deviceModal = document.getElementById('device-modal');
+        const deviceOptions = document.querySelectorAll('.device-option');
+        const cancelDeviceBtn = document.getElementById('cancel-device-btn');
+
+        // Initialize the app
+        function init() {
+            // Password input dots
+            updatePasswordDots();
+            
+            // Event listeners
+            passwordInput.addEventListener('input', updatePasswordDots);
+            togglePassword.addEventListener('click', togglePasswordVisibility);
+            loginBtn.addEventListener('click', handleLogin);
+            logoutBtn.addEventListener('click', handleLogout);
+            tableSelect.addEventListener('change', handleTableSelect);
+            productSearch.addEventListener('input', filterProducts);
+            clearOrderBtn.addEventListener('click', clearOrder);
+            finalizeOrderBtn.addEventListener('click', showReceipt);
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelModalBtn.addEventListener('click', closeModal);
+            decrementQuantity.addEventListener('click', () => adjustQuantity(-1));
+            incrementQuantity.addEventListener('click', () => adjustQuantity(1));
+            addToOrderBtn.addEventListener('click', addToOrder);
+            downloadReceiptBtn.addEventListener('click', showDeviceSelection);
+            printReceiptBtn.addEventListener('click', printReceipt);
+            
+            // Device selection
+            deviceOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    selectedDevice = option.dataset.device;
+                    deviceModal.classList.add('hidden');
+                    downloadReceipt();
+                });
+            });
+            
+            cancelDeviceBtn.addEventListener('click', () => {
+                deviceModal.classList.add('hidden');
+            });
+            
+            // Prevent quantity input from going below 1
+            productQuantity.addEventListener('change', () => {
+                if (productQuantity.value < 1) {
+                    productQuantity.value = 1;
+                }
+            });
+            
+            // Close modals when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target === productModal) {
+                    closeModal();
+                }
+                if (e.target === receiptModal) {
+                    receiptModal.classList.add('hidden');
+                }
+                if (e.target === deviceModal) {
+                    deviceModal.classList.add('hidden');
+                }
+            });
+            
+            // Close search results when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!productSearch.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePassword.classList.replace('fa-eye', 'fa-eye-slash');
+                passwordDots.style.display = 'none';
+            } else {
+                passwordInput.type = 'password';
+                togglePassword.classList.replace('fa-eye-slash', 'fa-eye');
+                passwordDots.style.display = 'flex';
+            }
+        }
+
+        // Update password dots based on input length
+        function updatePasswordDots() {
+            passwordDots.innerHTML = '';
+            const length = passwordInput.value.length;
+            
+            for (let i = 0; i < 4; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'password-dot';
+                dot.style.opacity = i < length ? '1' : '0.2';
+                passwordDots.appendChild(dot);
+            }
+        }
+
+        // Handle login
+        function handleLogin() {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            
+            if (!username || !password) {
+                showLoginError();
+                return;
+            }
+            
+            // Show loading state
+            loginText.classList.add('hidden');
+            loginSpinner.classList.remove('hidden');
+            
+            // Simulate network delay
+            setTimeout(() => {
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    currentUser = user;
+                    showAppScreen();
+                } else {
+                    showLoginError();
+                }
+                
+                // Hide loading state
+                loginText.classList.remove('hidden');
+                loginSpinner.classList.add('hidden');
+            }, 800);
+        }
+
+        // Show login error
+        function showLoginError() {
+            loginError.classList.remove('hidden');
+            passwordInput.classList.add('shake');
+            setTimeout(() => {
+                passwordInput.classList.remove('shake');
+            }, 500);
+        }
+
+        // Show app screen
+        function showAppScreen() {
+            loginScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            currentUserSpan.textContent = currentUser.username;
+        }
+
+        // Handle logout
+        function handleLogout() {
+            // Clear all data
+            currentUser = null;
+            currentTable = null;
+            currentOrder = [];
+            
+            // Reset form fields
+            usernameInput.value = '';
+            passwordInput.value = '';
+            tableSelect.value = '';
+            productSearch.value = '';
+            customerName.value = '';
+            customerId.value = '';
+            customerContact.value = '';
+            
+            // Reset UI
+            loginError.classList.add('hidden');
+            updatePasswordDots();
+            updateOrderSummary();
+            
+            // Show login screen
+            appScreen.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            
+            // Clear any local storage
+            localStorage.removeItem('pedidoPendiente');
+            sessionStorage.clear();
+        }
+
+        // Handle table selection
+        function handleTableSelect() {
+            const tableId = parseInt(tableSelect.value);
+            const table = tables.find(t => t.id === tableId);
+            
+            if (table) {
+                if (currentOrder.length > 0) {
+                    if (confirm('¿Está seguro de cambiar de mesa? Se perderá el pedido actual.')) {
+                        selectTable(table);
+                        clearOrder();
+                    } else {
+                        // Revert to previous selection
+                        tableSelect.value = currentTable ? currentTable.id : '';
+                    }
+                } else {
+                    selectTable(table);
+                }
+            }
+        }
+
+        // Select table
+        function selectTable(table) {
+            currentTable = table;
+            currentTableSpan.textContent = table.label;
+            
+            // Enable product search
+            productSearch.disabled = false;
+            productSearch.classList.remove('disabled');
+            productSearch.focus();
+        }
+
+        // Filter products by search term
+        function filterProducts() {
+            const searchTerm = productSearch.value.toLowerCase().trim();
+            
+            if (searchTerm.length === 0) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+            
+            const filteredProducts = products.filter(product => 
+                product.name.toLowerCase().includes(searchTerm)
+            );
+            
+            showSearchResults(filteredProducts, searchTerm);
+        }
+
+        // Show search results in dropdown
+        function showSearchResults(filteredProducts, searchTerm) {
+            searchResults.innerHTML = '';
+            
+            if (filteredProducts.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="search-result-item text-gray-500">
+                        No se encontraron productos
+                    </div>
+                `;
+                searchResults.classList.remove('hidden');
+                return;
+            }
+            
+            filteredProducts.forEach(product => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                
+                // Highlight search term in product name
+                const regex = new RegExp(searchTerm, 'gi');
+                const displayName = product.name.replace(regex, match => `<span class="highlight">${match}</span>`);
+                
+                resultItem.innerHTML = `
+                    <div class="flex justify-between">
+                        <span>${displayName}</span>
+                        <span class="text-primary font-medium">$${product.price.toLocaleString()}</span>
+                    </div>
+                `;
+                
+                resultItem.addEventListener('click', () => {
+                    openProductModal(product);
+                    productSearch.value = '';
+                    searchResults.classList.add('hidden');
+                });
+                
+                searchResults.appendChild(resultItem);
+            });
+            
+            searchResults.classList.remove('hidden');
+        }
+
+        // Open product modal
+        function openProductModal(product) {
+            currentProduct = product;
+            modalProductName.textContent = product.name;
+            modalProductPrice.textContent = `$${product.price.toLocaleString()}`;
+            productQuantity.value = 1;
+            productNotes.value = '';
+            productModal.classList.remove('hidden');
+            
+            // Set default button text
+            addToOrderText.textContent = 'Agregar';
+            addToOrderBtn.onclick = addToOrder;
+            editingIndex = null;
+        }
+
+        // Close product modal
+        function closeModal() {
+            productModal.classList.add('hidden');
+            currentProduct = null;
+            editingIndex = null;
+        }
+
+        // Adjust quantity
+        function adjustQuantity(change) {
+            let newQuantity = parseInt(productQuantity.value) + change;
+            if (newQuantity < 1) newQuantity = 1;
+            if (newQuantity > 50) newQuantity = 50;
+            productQuantity.value = newQuantity;
+        }
+
+        // Add product to order
+        function addToOrder() {
+            const quantity = parseInt(productQuantity.value);
+            
+            // Validate quantity
+            if (quantity < 1) {
+                alert('La cantidad no puede ser menor a 1');
+                return;
+            }
+            
+            const notes = productNotes.value;
+            
+            // Show loading state
+            addToOrderText.classList.add('hidden');
+            addToOrderSpinner.classList.remove('hidden');
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                if (editingIndex !== null) {
+                    // Update existing item
+                    currentOrder[editingIndex] = {
+                        product: currentProduct,
+                        quantity: quantity,
+                        notes: notes
+                    };
+                } else {
+                    // Check if identical product already exists in order
+                    const existingIndex = currentOrder.findIndex(item => 
+                        item.product.id === currentProduct.id && 
+                        item.notes === notes
+                    );
+                    
+                    if (existingIndex !== -1) {
+                        // Update quantity of existing item
+                        currentOrder[existingIndex].quantity += quantity;
+                    } else {
+                        // Add new item to order
+                        currentOrder.push({
+                            product: currentProduct,
+                            quantity: quantity,
+                            notes: notes
+                        });
+                    }
+                }
+                
+                // Update order summary
+                updateOrderSummary();
+                closeModal();
+                
+                // Enable finalize order button
+                finalizeOrderBtn.disabled = false;
+                
+                // Hide loading state
+                addToOrderText.classList.remove('hidden');
+                addToOrderSpinner.classList.add('hidden');
+            }, 500);
+        }
+
+        // Update order summary
+        function updateOrderSummary() {
+            if (currentOrder.length === 0) {
+                orderItems.innerHTML = '<div class="text-center text-gray-500 py-4">No hay productos agregados</div>';
+                totalSpan.textContent = '$0';
+                finalizeOrderBtn.disabled = true;
+                return;
+            }
+            
+            let total = 0;
+            orderItems.innerHTML = '';
+            
+            // Use two columns if more than 10 items
+            const useTwoColumns = currentOrder.length > 10;
+            
+            if (useTwoColumns) {
+                orderItems.classList.add('two-columns');
+            } else {
+                orderItems.classList.remove('two-columns');
+            }
+            
+            currentOrder.forEach((item, index) => {
+                const itemTotal = item.product.price * item.quantity;
+                total += itemTotal;
+                
+                const orderItem = document.createElement('div');
+                orderItem.className = 'border-b border-gray-200 py-3 order-item-animation';
+                orderItem.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <div>
+                            <h4 class="font-medium">${item.product.name} <span class="text-sm text-gray-500">x${item.quantity}</span></h4>
+                            ${item.notes ? `<p class="text-xs text-gray-500 mt-1">${item.notes}</p>` : ''}
+                        </div>
+                        <span class="font-medium">$${itemTotal.toLocaleString()}</span>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button class="edit-item btn-secondary text-sm px-3 py-1 rounded" data-index="${index}">
+                            Editar
+                        </button>
+                        <button class="delete-item btn-danger text-sm px-3 py-1 rounded" data-index="${index}">
+                            Eliminar
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener to edit button
+                const editBtn = orderItem.querySelector('.edit-item');
+                editBtn.addEventListener('click', (e) => {
+                    const index = parseInt(editBtn.dataset.index);
+                    editOrderItem(index);
+                });
+                
+                // Add event listener to delete button
+                const deleteBtn = orderItem.querySelector('.delete-item');
+                deleteBtn.addEventListener('click', (e) => {
+                    const index = parseInt(deleteBtn.dataset.index);
+                    deleteOrderItem(index);
+                });
+                
+                orderItems.appendChild(orderItem);
+            });
+            
+            totalSpan.textContent = `$${total.toLocaleString()}`;
+            
+            // Add pulse animation to total
+            totalSpan.classList.add('pulse');
+            setTimeout(() => {
+                totalSpan.classList.remove('pulse');
+            }, 500);
+        }
+
+        // Edit order item
+        function editOrderItem(index) {
+            const item = currentOrder[index];
+            currentProduct = item.product;
+            editingIndex = index;
+            
+            modalProductName.textContent = item.product.name;
+            modalProductPrice.textContent = `$${item.product.price.toLocaleString()}`;
+            productQuantity.value = item.quantity;
+            productNotes.value = item.notes;
+            productModal.classList.remove('hidden');
+            
+            // Change the add button to update button
+            addToOrderText.textContent = 'Actualizar';
+            addToOrderBtn.onclick = function() {
+                const quantity = parseInt(productQuantity.value);
+                const notes = productNotes.value;
+                
+                // Update the item
+                currentOrder[index].quantity = quantity;
+                currentOrder[index].notes = notes;
+                
+                // Update order summary
+                updateOrderSummary();
+                closeModal();
+            };
+        }
+
+        // Delete order item
+        function deleteOrderItem(index) {
+            if (confirm('¿Está seguro de eliminar este producto del pedido?')) {
+                const itemToRemove = document.querySelector(`.delete-item[data-index="${index}"]`).closest('.order-item-animation');
+                itemToRemove.classList.add('order-item-remove');
+                
+                setTimeout(() => {
+                    currentOrder.splice(index, 1);
+                    updateOrderSummary();
+                }, 300);
+            }
+        }
+
+        // Clear order
+        function clearOrder() {
+            if (currentOrder.length === 0) return;
+            
+            if (confirm('¿Está seguro de limpiar el pedido actual?')) {
+                orderItems.classList.add('order-item-remove');
+                
+                setTimeout(() => {
+                    currentOrder = [];
+                    updateOrderSummary();
+                    orderItems.classList.remove('order-item-remove');
+                }, 300);
+            }
+        }
+
+        // Show receipt
+        function showReceipt() {
+            if (currentOrder.length === 0) {
+                alert('No hay productos en el pedido');
+                return;
+            }
+            
+            if (!currentTable) {
+                alert('Por favor seleccione una mesa');
+                return;
+            }
+            
+            // Show loading state
+            finalizeText.classList.add('hidden');
+            finalizeSpinner.classList.remove('hidden');
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                // Calculate total
+                let total = 0;
+                currentOrder.forEach(item => {
+                    total += item.product.price * item.quantity;
+                });
+                
+                // Format date and time
+                const now = new Date();
+                const formattedDate = now.toLocaleDateString('es-CO', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                
+                const formattedTime = now.toLocaleTimeString('es-CO', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                }).toUpperCase();
+                
+                // Create receipt content
+                receiptContent.innerHTML = `
+                    <div class="receipt-container">
+                        <div class="receipt-header">
+                            <h1 class="receipt-title">BAHIA CHILL</h1>
+                            <div class="receipt-subheader">
+                                <p>Comanda Digital</p>
+                                <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
+                            </div>
+                            <div class="receipt-meta">
+                                <p>${formattedDate} - ${formattedTime}</p>
+                                <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
+                                <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
+                            </div>
+                        </div>
+                                            
+                        <table class="w-full mb-4">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-2 text-sm font-medium">Producto</th>
+                                    <th class="text-right py-2 text-sm font-medium">Cant.</th>
+                                    <th class="text-right py-2 text-sm font-medium">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${currentOrder.map(item => `
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-2 text-sm">
+                                            ${item.product.name}
+                                            ${item.notes ? `<br><span class="text-xs text-gray-500">${item.notes}</span>` : ''}
+                                        </td>
+                                        <td class="text-right py-2 text-sm">${item.quantity}</td>
+                                        <td class="text-right py-2 text-sm">$${(item.product.price * item.quantity).toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                                            
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between font-semibold text-lg">
+                                <span>Total:</span>
+                                <span>$${total.toLocaleString()}</span>
+                            </div>
+                        </div>
+                                            
+                        ${customerName.value || customerId.value || customerContact.value ? `
+                        <div class="mt-6 border-t border-gray-200 pt-4">
+                            <h2 class="text-lg font-semibold mb-2">Datos del Cliente</h2>
+                            ${customerName.value ? `<p class="text-sm mb-1"><span class="font-medium">Nombre:</span> ${customerName.value}</p>` : ''}
+                            ${customerId.value ? `<p class="text-sm mb-1"><span class="font-medium">${customerIdType.options[customerIdType.selectedIndex].text}:</span> ${customerId.value}</p>` : ''}
+                            ${customerContact.value ? `<p class="text-sm"><span class="font-medium">Contacto:</span> ${customerContact.value}</p>` : ''}
+                        </div>
+                        ` : ''}
+                                            
+                        <div class="receipt-footer">
+                            <p class="footer-text"><strong>Sistema de facturación de Bahia Chill ®</strong><br><strong>Todos los derechos reservados</strong></p>
+                        </div>
+                    </div>
+                `;
+                
+                // Show receipt modal
+                receiptModal.classList.remove('hidden');
+                
+                // Hide loading state
+                finalizeText.classList.remove('hidden');
+                finalizeSpinner.classList.add('hidden');
+            }, 800);
+        }
+
+        // Show device selection modal
+        function showDeviceSelection() {
+            deviceModal.classList.remove('hidden');
+            selectedDevice = null;
+        }
+
+        // Download receipt as PDF
+        function downloadReceipt() {
+            if (currentOrder.length === 0) {
+                alert('No hay productos en el pedido para generar el PDF');
+                return;
+            }
+            
+            // Clear any existing timeout
+            if (pdfGenerationTimeout) {
+                clearTimeout(pdfGenerationTimeout);
+            }
+            
+            const { jsPDF } = window.jspdf;
+            
+            // Determine PDF format based on selected device
+            const isMobile = selectedDevice === 'mobile';
+            const pdfFormat = isMobile ? [80, 297] : 'a4'; // Rollo térmico para móvil, A4 para desktop
+            const pdfOrientation = isMobile ? 'portrait' : 'landscape';
+            
+            const pdf = new jsPDF({
+                orientation: pdfOrientation,
+                unit: 'mm',
+                format: pdfFormat
+            });
+            
+            // Create a temporary container for pagination
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.width = isMobile ? '80mm' : '210mm';
+            document.body.appendChild(tempContainer);
+            
+            // Calculate how many products per page
+            const productsPerPage = isMobile ? 25 : 30;
+            const totalPages = Math.ceil(currentOrder.length / productsPerPage);
+            
+            // Show loading state
+            downloadReceiptBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generando...';
+            downloadReceiptBtn.disabled = true;
+            
+            // Set timeout for PDF generation (15 seconds max)
+            pdfGenerationTimeout = setTimeout(() => {
+                downloadReceiptBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar PDF';
+                downloadReceiptBtn.disabled = false;
+                document.body.removeChild(tempContainer);
+                alert('La generación del PDF está tomando más tiempo de lo esperado. Por favor intente nuevamente.');
+            }, 15000);
+            
+            // Generate each page
+            generatePage(0);
+            
+            function generatePage(pageIndex) {
+                const startIndex = pageIndex * productsPerPage;
+                const endIndex = Math.min(startIndex + productsPerPage, currentOrder.length);
+                const pageProducts = currentOrder.slice(startIndex, endIndex);
+                
+                // Calculate total for this page
+                let pageTotal = 0;
+                pageProducts.forEach(item => {
+                    pageTotal += item.product.price * item.quantity;
+                });
+                
+                // Format date and time
+                const now = new Date();
+                const formattedDate = now.toLocaleDateString('es-CO', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                
+                const formattedTime = now.toLocaleTimeString('es-CO', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                }).toUpperCase();
+                
+                // Create page content
+                const pageContent = document.createElement('div');
+                pageContent.className = 'receipt-container';
+                pageContent.style.width = isMobile ? '80mm' : '100%';
+                pageContent.style.padding = isMobile ? '5px' : '15px';
+                pageContent.style.fontSize = isMobile ? '10px' : '12px';
+                
+                pageContent.innerHTML = `
+                    <div class="receipt-header">
+                        <h1 class="receipt-title" style="font-size: ${isMobile ? '18px' : '22px'}">BAHIA CHILL</h1>
+                        <div class="receipt-subheader">
+                            <p style="font-size: ${isMobile ? '12px' : '14px'}">Comanda Digital</p>
+                            <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
+                        </div>
+                        <div class="receipt-meta">
+                            <p>${formattedDate} - ${formattedTime}</p>
+                            <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
+                            <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
+                            ${totalPages > 1 ? `<p><span class="font-medium">Página:</span> ${pageIndex + 1} de ${totalPages}</p>` : ''}
+                        </div>
+                    </div>
+                                        
+                    <table style="width: 100%; margin-bottom: ${isMobile ? '10px' : '15px'};">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Producto</th>
+                                <th class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Cant.</th>
+                                <th class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${pageProducts.map(item => `
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-2" style="font-size: ${isMobile ? '10px' : '12px'}">
+                                        ${item.product.name}
+                                        ${item.notes ? `<br><span class="text-xs text-gray-500">${item.notes}</span>` : ''}
+                                    </td>
+                                    <td class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">${item.quantity}</td>
+                                    <td class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">$${(item.product.price * item.quantity).toLocaleString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                                        
+                    <div class="border-t border-gray-200 pt-3">
+                        <div class="flex justify-between font-semibold" style="font-size: ${isMobile ? '14px' : '16px'}">
+                            <span>Total ${totalPages > 1 ? `(Página ${pageIndex + 1})` : ''}:</span>
+                            <span>$${pageTotal.toLocaleString()}</span>
+                        </div>
+                    </div>
+                                        
+                    ${pageIndex === totalPages - 1 ? `
+                    ${customerName.value || customerId.value || customerContact.value ? `
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h2 class="text-lg font-semibold mb-2">Datos del Cliente</h2>
+                        ${customerName.value ? `<p class="text-sm mb-1"><span class="font-medium">Nombre:</span> ${customerName.value}</p>` : ''}
+                        ${customerId.value ? `<p class="text-sm mb-1"><span class="font-medium">${customerIdType.options[customerIdType.selectedIndex].text}:</span> ${customerId.value}</p>` : ''}
+                        ${customerContact.value ? `<p class="text-sm"><span class="font-medium">Contacto:</span> ${customerContact.value}</p>` : ''}
+                    </div>
+                    ` : ''}
+                    
+                    <div class="receipt-footer">
+                        <p class="footer-text"><strong>Sistema de facturación de Bahia Chill ®</strong><br><strong>Todos los derechos reservados</strong></p>
+                    </div>
+                    ` : ''}
+                `;
+                
+                tempContainer.innerHTML = '';
+                tempContainer.appendChild(pageContent);
+                
+                // Convert to canvas
+                html2canvas(pageContent, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: true,
+                    letterRendering: true,
+                    dpi: 300,
+                    width: isMobile ? 300 : 800,
+                    windowWidth: isMobile ? 300 : 800
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png', 1.0);
+                    const imgProps = pdf.getImageProperties(imgData);
+                    
+                    // Calculate dimensions
+                    let pageWidth, pageHeight;
+                    if (isMobile) {
+                        pageWidth = 80; // Ancho del PDF en mm
+                        pageHeight = (imgProps.height * pageWidth) / imgProps.width;
+                    } else {
+                        // For desktop (A4 landscape)
+                        pageWidth = pdf.internal.pageSize.getWidth() - 30; // Margins
+                        pageHeight = (imgProps.height * pageWidth) / imgProps.width;
+                    }
+                    
+                    // Add page (except first page)
+                    if (pageIndex > 0) {
+                        pdf.addPage();
+                    }
+                    
+                    // Add image to PDF
+                    pdf.addImage(imgData, 'PNG', isMobile ? 0 : 15, isMobile ? 0 : 15, pageWidth, pageHeight);
+                    
+                    // Check if we need to generate more pages
+                    if (pageIndex < totalPages - 1) {
+                        generatePage(pageIndex + 1);
+                    } else {
+                        // Finalize PDF
+                        pdf.setCreator('Bahia Chill SAS');
+                        pdf.setLanguage('es-CO');
+                        pdf.setProperties({
+                            title: `Comanda ${currentTable.label}`,
+                            subject: 'Recibo de pedido',
+                            author: currentUser.username
+                        });
+                        
+                        const fileName = `Comanda_${currentTable.label.replace(' ', '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+                        pdf.save(fileName);
+                        
+                        // Reset order
+                        currentOrder = [];
+                        updateOrderSummary();
+                        customerName.value = '';
+                        customerId.value = '';
+                        customerContact.value = '';
+                        receiptModal.classList.add('hidden');
+                        
+                        // Reset button
+                        downloadReceiptBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar PDF';
+                        downloadReceiptBtn.disabled = false;
+                        
+                        // Clean up
+                        document.body.removeChild(tempContainer);
+                        clearTimeout(pdfGenerationTimeout);
+                    }
+                }).catch(error => {
+                    console.error('Error generating PDF:', error);
+                    alert('Ocurrió un error al generar el PDF. Por favor intente nuevamente.');
+                    
+                    // Reset button
+                    downloadReceiptBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar PDF';
+                    downloadReceiptBtn.disabled = false;
+                    clearTimeout(pdfGenerationTimeout);
+                    document.body.removeChild(tempContainer);
+                });
+            }
+        }
+        
+        // Print receipt
+        function printReceipt() {
+            window.print();
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=SomosVitalle/comanda" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</html>
