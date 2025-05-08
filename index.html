@@ -916,12 +916,6 @@
 
         // Initialize the app
         function init() {
-            document.getElementById('logout-cancel').addEventListener('click', () => {
-    document.getElementById('logout-modal').classList.add('hidden');
-});
-
-document.getElementById('logout-confirm').addEventListener('click', () => {
-    document.getElementById('logout-modal').classList.add('hidden');
             // Password input dots
             updatePasswordDots();
             
@@ -1058,8 +1052,6 @@ document.getElementById('logout-confirm').addEventListener('click', () => {
 
         // Handle logout
         function handleLogout() {
-    document.getElementById('logout-modal').classList.remove('hidden');
-}
             // Clear all data
             currentUser = null;
             currentTable = null;
@@ -1377,41 +1369,19 @@ document.getElementById('logout-confirm').addEventListener('click', () => {
         }
 
         // Clear order
-        
-function clearOrder() {
-    if (currentOrder.length === 0) return;
-    
-    if (confirm('¿Está seguro de limpiar el pedido actual?')) {
-        // Limpiar datos del cliente
-        customerName.value = "";
-        customerIdType.selectedIndex = 0;
-        customerId.value = "";
-        customerContact.value = "";
-        
-        orderItems.classList.add('order-item-remove');
-        
-        setTimeout(() => {
-            currentOrder = [];
-            updateOrderSummary();
-            orderItems.classList.remove('order-item-remove');
-        }, 300);
-    }
-}
-        // Limpiar datos del cliente
-        customerName.value = "";
-        customerIdType.selectedIndex = 0;
-        customerId.value = "";
-        customerContact.value = "";
-        
-        orderItems.classList.add('order-item-remove');
-        
-        setTimeout(() => {
-            currentOrder = [];
-            updateOrderSummary();
-            orderItems.classList.remove('order-item-remove');
-        }, 300);
-    }
-}
+        function clearOrder() {
+            if (currentOrder.length === 0) return;
+            
+            if (confirm('¿Está seguro de limpiar el pedido actual?')) {
+                orderItems.classList.add('order-item-remove');
+                
+                setTimeout(() => {
+                    currentOrder = [];
+                    updateOrderSummary();
+                    orderItems.classList.remove('order-item-remove');
+                }, 300);
+            }
+        }
 
         // Show receipt
         function showReceipt() {
@@ -1452,49 +1422,49 @@ function clearOrder() {
                 }).toUpperCase();
                 
                 // Create receipt content
-receiptContent.innerHTML = `
-    <div class="receipt-container">
-        <div class="receipt-header">
-            <h1 class="receipt-title text-black">BAHIA CHILL</h1> <!-- Añadido text-black -->
-            <div class="receipt-subheader">
-                <p class="text-black">Comanda Digital</p> <!-- Añadido text-black -->
-                <p class="company-info text-black">Bahia Chill S.A.S | NIT: 123456789-0</p> <!-- Añadido text-black -->
-            </div>
-            <div class="receipt-meta text-black"> <!-- Añadido text-black -->
-                <p>${formattedDate} - ${formattedTime}</p>
-                <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
-                <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
-            </div>
-        </div>
-                        
-        <table class="w-full mb-4">
-            <thead>
-                <tr class="border-b border-gray-200">
-                    <th class="text-left py-2 text-sm font-medium text-black">Producto</th> <!-- Añadido text-black -->
-                    <th class="text-right py-2 text-sm font-medium text-black">Cant.</th> <!-- Añadido text-black -->
-                    <th class="text-right py-2 text-sm font-medium text-black">Total</th> <!-- Añadido text-black -->
-                </tr>
-            </thead>
-            <tbody>
-                ${currentOrder.map(item => `
-                    <tr class="border-b border-gray-100">
-                        <td class="py-2 text-sm text-black"> <!-- Añadido text-black -->
-                            ${item.product.name}
-                            ${item.notes ? `<br><span class="text-xs text-black">${item.notes}</span>` : ''} <!-- Cambiado text-gray-500 a text-black -->
-                        </td>
-                        <td class="text-right py-2 text-sm text-black">${item.quantity}</td> <!-- Añadido text-black -->
-                        <td class="text-right py-2 text-sm text-black">$${(item.product.price * item.quantity).toLocaleString()}</td> <!-- Añadido text-black -->
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-                        
-        <div class="border-t border-gray-200 pt-3">
-            <div class="flex justify-between font-semibold text-lg text-black"> <!-- Añadido text-black -->
-                <span>Total:</span>
-                <span>$${total.toLocaleString()}</span>
-            </div>
-        </div>
+                receiptContent.innerHTML = `
+                    <div class="receipt-container">
+                        <div class="receipt-header">
+                            <h1 class="receipt-title">BAHIA CHILL</h1>
+                            <div class="receipt-subheader">
+                                <p>Comanda Digital</p>
+                                <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
+                            </div>
+                            <div class="receipt-meta">
+                                <p>${formattedDate} - ${formattedTime}</p>
+                                <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
+                                <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
+                            </div>
+                        </div>
+                                            
+                        <table class="w-full mb-4">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-2 text-sm font-medium">Producto</th>
+                                    <th class="text-right py-2 text-sm font-medium">Cant.</th>
+                                    <th class="text-right py-2 text-sm font-medium">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${currentOrder.map(item => `
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-2 text-sm">
+                                            ${item.product.name}
+                                            ${item.notes ? `<br><span class="text-xs text-gray-500">${item.notes}</span>` : ''}
+                                        </td>
+                                        <td class="text-right py-2 text-sm">${item.quantity}</td>
+                                        <td class="text-right py-2 text-sm">$${(item.product.price * item.quantity).toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                                            
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between font-semibold text-lg">
+                                <span>Total:</span>
+                                <span>$${total.toLocaleString()}</span>
+                            </div>
+                        </div>
                                             
                         ${customerName.value || customerId.value || customerContact.value ? `
                         <div class="mt-6 border-t border-gray-200 pt-4">
@@ -1525,21 +1495,6 @@ receiptContent.innerHTML = `
             deviceModal.classList.remove('hidden');
             selectedDevice = null;
         }
-<div id="logout-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-xl p-6 w-80 fade-in">
-        <div class="text-center mb-4">
-            <p class="text-gray-700">¿Seguro que quieres salir?</p>
-        </div>
-        <div class="flex justify-center space-x-4">
-            <button id="logout-cancel" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
-                Cancelar
-            </button>
-            <button id="logout-confirm" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90">
-                Salir
-            </button>
-        </div>
-    </div>
-</div>
 
         // Download receipt as PDF
         function downloadReceipt() {
@@ -1772,5 +1727,5 @@ receiptContent.innerHTML = `
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
     </script>
-<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=SomosVitalle/comanda" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</body>
 </html>
