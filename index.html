@@ -556,6 +556,21 @@
             background-color: rgba(255,255,255,0.8);
             padding: 2px 5px;
             border-radius: 3px;
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabase = createClient(
+    "https://bwpdoplnlaxrerughatp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cGRvcGxubGF4cmVydWdoYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MDA2MjUsImV4cCI6MjA2MzA3NjYyNX0.ZLK0GoV2kob_Whocz_QGuUWNLJZ0UUL7LJyt-B1NPcQ"
+  );
+            supabase.auth.getUser()
+        .then(response => {
+            if (!response.error) {
+                console.log("¡Conexión Exitosa!");
+            } else {
+                console.error("Error de conexión:", response.error);
+            }
+        });
+        
         }
     </style>
 </head>
