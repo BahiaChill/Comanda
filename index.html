@@ -292,7 +292,7 @@
         }
         
         /* Receipt styles */
-        ./* Encabezado del recibo */
+        /* Encabezado del recibo */
 .receipt-header {
     text-align: center;
     border-bottom: 2px solid #3d819d; /* Mantiene el borde azul original */
@@ -350,6 +350,20 @@
                 display: none !important;
             }
         }
+        
+        /* Ajustar estilos para centrar el contenido al imprimir */
+@media print {
+    .receipt-container {
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .receipt-header,
+    .receipt-footer,
+    .receipt-content > div {
+        text-align: center;
+    }
+}
         
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -528,6 +542,7 @@
         @media print {
             body {
                 -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
             
             .receipt-container {
@@ -546,33 +561,48 @@
             }
         }
 
-        /* Pagination indicator */
-        .page-indicator {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            font-size: 10px;
-            color: #666;
-            background-color: rgba(255,255,255,0.8);
-            padding: 2px 5px;
-            border-radius: 3px;
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    /* Pagination indicator */
+    .page-indicator {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        font-size: 10px;
+        color: #666;
+        background-color: rgba(255,255,255,0.8);
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+
+    /* Reducir el tamaño de la letra al imprimir en 2 puntos */
+@media print {
+    .receipt-container {
+        font-size: calc(10px - 2px) !important; /* Ajusta el tamaño base */
+    }
+
+    .receipt-title {
+        font-size: calc(18px - 2px) !important; /* Ajusta el tamaño del título */
+    }
+
+    .receipt-content, .receipt-footer {
+        font-size: calc(12px - 2px) !important; /* Ajusta el tamaño del contenido y pie de página */
+    }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const supabase = createClient(
     "https://bwpdoplnlaxrerughatp.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cGRvcGxubGF4cmVydWdoYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MDA2MjUsImV4cCI6MjA2MzA3NjYyNX0.ZLK0GoV2kob_Whocz_QGuUWNLJZ0UUL7LJyt-B1NPcQ"
   );
-            supabase.auth.getUser()
-        .then(response => {
-            if (!response.error) {
-                console.log("¡Conexión Exitosa!");
-            } else {
-                console.error("Error de conexión:", response.error);
-            }
-        });
-        
-        }
-    </style>
+  supabase.auth.getUser()
+    .then(response => {
+      if (!response.error) {
+        console.log("¡Conexión Exitosa!");
+      } else {
+        console.error("Error de conexión:", response.error);
+      }
+    });
+</script>
 </head>
 <body class="min-h-screen">
     <!-- Login Screen -->
@@ -905,6 +935,7 @@
         let editingIndex = null;
         let pdfGenerationTimeout = null;
         let selectedDevice = null;
+        let currentOrderDiscount = null; // Nuevo estado para el descuento
 
         // DOM Elements
         const loginScreen = document.getElementById('login-screen');
@@ -1304,23 +1335,22 @@
                 finalizeOrderBtn.disabled = true;
                 return;
             }
-            
+
             let total = 0;
             orderItems.innerHTML = '';
-            
-            // Use two columns if more than 10 items
+
             const useTwoColumns = currentOrder.length > 10;
-            
+
             if (useTwoColumns) {
                 orderItems.classList.add('two-columns');
             } else {
                 orderItems.classList.remove('two-columns');
             }
-            
+
             currentOrder.forEach((item, index) => {
                 const itemTotal = item.product.price * item.quantity;
                 total += itemTotal;
-                
+
                 const orderItem = document.createElement('div');
                 orderItem.className = 'border-b border-gray-200 py-3 order-item-animation';
                 orderItem.innerHTML = `
@@ -1329,7 +1359,10 @@
                             <h4 class="font-medium">${item.product.name} <span class="text-sm text-gray-500">x${item.quantity}</span></h4>
                             ${item.notes ? `<p class="text-xs text-gray-500 mt-1">${item.notes}</p>` : ''}
                         </div>
-                        <span class="font-medium">$${itemTotal.toLocaleString()}</span>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">$${item.product.price.toLocaleString()} c/u</p>
+                            <span class="font-medium">$${itemTotal.toLocaleString()}</span>
+                        </div>
                     </div>
                     <div class="flex justify-end space-x-3">
                         <button class="edit-item btn-secondary text-sm px-3 py-1 rounded" data-index="${index}">
@@ -1424,7 +1457,7 @@
         }
 
         // Show receipt
-        function showReceipt() {
+        function showReceipt(paymentMethod = null) {
             if (currentOrder.length === 0) {
                 alert('No hay productos en el pedido');
                 return;
@@ -1435,19 +1468,14 @@
                 return;
             }
             
-            // Show loading state
+            // Mostrar estado de carga
             finalizeText.classList.add('hidden');
             finalizeSpinner.classList.remove('hidden');
             
-            // Simulate processing delay
+            // Simular retraso de procesamiento
             setTimeout(() => {
-                // Calculate total
-                let total = 0;
-                currentOrder.forEach(item => {
-                    total += item.product.price * item.quantity;
-                });
-                
-                // Format date and time
+                let subtotal = currentOrder.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+                let total = subtotal - (currentOrderDiscount?.amount || 0);
                 const now = new Date();
                 const formattedDate = now.toLocaleDateString('es-CO', {
                     day: 'numeric',
@@ -1461,17 +1489,16 @@
                     hour12: true
                 }).toUpperCase();
                 
-                // Create receipt content
                 receiptContent.innerHTML = `
                     <div class="receipt-container">
                         <div class="receipt-header">
                             <h1 class="receipt-title">BAHIA CHILL</h1>
                             <div class="receipt-subheader">
                                 <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
-                                <p class="company-info">Calle 12, #45-67 Avenida Universitaria, Tunja</p>
-                                <p class="company-info">Tel: 3012345678 | bahiachillcafebar@gmail.com</p>
-                                <p class="company-info">Resolución Dian 1234567890 del 12/34/5678</p>
-                                <p class="company-info">Régimen Simple de Tributación</p>
+                                <p class="company-info" style="font-size: 12px;">Calle 12, #45-67 Avenida Universitaria, Tunja</p>
+                                <p class="company-info" style="font-size: 12px;">Tel: 3012345678 | bahiachillcafebar@gmail.com</p>
+                                <p class="company-info" style="font-size: 12px;">Resolución Dian 1234567890 del 12/34/5678</p>
+                                <p class="company-info" style="font-size: 12px;">Régimen Simple de Tributación</p>
                             </div>
                             <div class="receipt-meta">
                                 <p>${formattedDate} - ${formattedTime}</p>
@@ -1484,32 +1511,56 @@
                             <thead>
                                 <tr class="border-b border-gray-200">
                                     <th class="text-left py-2 text-sm font-medium">Producto</th>
+                                    <th class="text-right py-2 text-sm font-medium">Precio Unitario</th>
                                     <th class="text-right py-2 text-sm font-medium">Cant.</th>
                                     <th class="text-right py-2 text-sm font-medium">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${currentOrder.map(item => `
-                                    <tr class="border-b border-gray-100">
-                                        <td class="py-2 text-sm">
-                                            ${item.product.name}
-                                            ${item.notes ? `<br><span class="text-xs text-gray-500">${item.notes}</span>` : ''}
-                                        </td>
-                                        <td class="text-right py-2 text-sm">${item.quantity}</td>
-                                        <td class="text-right py-2 text-sm">$${(item.product.price * item.quantity).toLocaleString()}</td>
-                                    </tr>
-                                `).join('')}
+                                ${currentOrder.map(item => {
+                                    const itemTotal = item.product.price * item.quantity;
+                                    return `
+                                        <tr>
+                                            <td class="text-left py-2 text-sm">${item.product.name}</td>
+                                            <td class="text-right py-2 text-sm">$${item.product.price.toLocaleString()}</td>
+                                            <td class="text-right py-2 text-sm">${item.quantity}</td>
+                                            <td class="text-right py-2 text-sm">$${itemTotal.toLocaleString()}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
-                                            
+                        
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between font-semibold text-lg">
+                                <span>Subtotal:</span>
+                                <span>$${subtotal.toLocaleString('es-CO')}</span>
+                            </div>
+                        </div>
+                        
+                        ${currentOrderDiscount ? `
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between font-semibold text-lg">
+                                <span>Descuento:</span>
+                                <span>-$${currentOrderDiscount.amount.toLocaleString('es-CO')}</span>
+                            </div>
+                        </div>
+                        ` : ''}
+
                         <div class="border-t border-gray-200 pt-3">
                             <div class="flex justify-between font-semibold text-lg">
                                 <span>Total:</span>
-                                <span>$${total.toLocaleString()}</span>
+                                <span>$${total.toLocaleString('es-CO')}</span>
                             </div>
                         </div>
-                                            
-                        ${customerName.value || customerId.value || customerContact.value ? `
+                                                
+                        ${paymentMethod ? `
+                        <div class="mt-4 text-sm text-gray-700">
+                            <p><strong>Medio de Pago:</strong> ${paymentMethod}</p>
+                        </div>
+                        ` : ''}
+
+                        ${(customerName.value || customerId.value || customerContact.value) ? `
                         <div class="mt-6 border-t border-gray-200 pt-4">
                             <h2 class="text-lg font-semibold mb-2">Datos del Cliente</h2>
                             ${customerName.value ? `<p class="text-sm mb-1"><span class="font-medium">Nombre:</span> ${customerName.value}</p>` : ''}
@@ -1517,22 +1568,22 @@
                             ${customerContact.value ? `<p class="text-sm"><span class="font-medium">Contacto:</span> ${customerContact.value}</p>` : ''}
                         </div>
                         ` : ''}
-                                            
+                        
                         <div class="receipt-footer">
                             <p class="footer-text"><strong>Sistema de facturación de Bahia Chill ®</strong><br><strong>Todos los derechos reservados</strong></p>
                         </div>
                     </div>
                 `;
                 
-                // Show receipt modal
+                // Mostrar el modal del recibo
                 receiptModal.classList.remove('hidden');
                 
-                // Hide loading state
+                // Ocultar estado de carga
                 finalizeText.classList.remove('hidden');
                 finalizeSpinner.classList.add('hidden');
             }, 800);
         }
-
+        
         // Show device selection modal
         function showDeviceSelection() {
             deviceModal.classList.remove('hidden');
@@ -1628,9 +1679,9 @@
                         <div class="receipt-subheader">
                             <p style="font-size: ${isMobile ? '12px' : '14px'}"
                                 <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
-                                <p class="company-info">Calle 12, #45-67 Avenida Universitaria, Tunja</p>
-                                <p class="company-info">Tel: 3012345678</p>
-                                <p class="company-info">bahiachillcafebar@gmail.com</p>
+                                <p class="company-info" style="font-size: 12px;">Calle 12, #45-67 Avenida Universitaria, Tunja</p>
+                                <p class="company-info" style="font-size: 12px;">Tel: 3012345678</p>
+                                <p class="company-info" style="font-size: 12px;">bahiachillcafebar@gmail.com</p>
                         </div>
                         <div class="receipt-meta">
                             <p>${formattedDate} - ${formattedTime}</p>
@@ -1644,6 +1695,7 @@
                         <thead>
                             <tr class="border-b border-gray-200">
                                 <th class="text-left py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Producto</th>
+                                <th class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Precio Unitario</th>
                                 <th class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Cant.</th>
                                 <th class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Total</th>
                             </tr>
@@ -1655,6 +1707,7 @@
                                         ${item.product.name}
                                         ${item.notes ? `<br><span class="text-xs text-gray-500">${item.notes}</span>` : ''}
                                     </td>
+                                    <td class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">$${item.product.price.toLocaleString()}</td>
                                     <td class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">${item.quantity}</td>
                                     <td class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">$${(item.product.price * item.quantity).toLocaleString()}</td>
                                 </tr>
@@ -1770,8 +1823,452 @@
             window.print();
         }
 
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', init);
+        // Agregar un menú desplegable para seleccionar el medio de pago
+const paymentMethodContainer = document.createElement('div');
+paymentMethodContainer.className = 'mb-6';
+paymentMethodContainer.innerHTML = `
+    <label for="payment-method" class="block text-gray-700 text-sm font-medium mb-2">Medio de Pago</label>
+    <select id="payment-method" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+        <option value="" disabled selected>Seleccione un medio de pago</option>
+        <option value="Efectivo">Efectivo</option>
+        <option value="Consignación Bancaria">Consignación Bancaria</option>
+        <option value="Tarjeta Crédito">Tarjeta Crédito</option>
+        <option value="Tarjeta Débito">Tarjeta Débito</option>
+    </select>
+    <p id="payment-method-error" class="text-red-500 text-sm hidden">Por favor seleccione un medio de pago.</p>
+`;
+
+// Insertar el menú en el formulario de pedido
+const orderForm = document.querySelector('#order-items');
+orderForm.parentNode.insertBefore(paymentMethodContainer, orderForm.nextSibling);
+
+// Validar que se haya seleccionado un medio de pago antes de finalizar el pedido
+const finalizeOrderButton = document.querySelector('#finalize-order-btn');
+finalizeOrderButton.addEventListener('click', (event) => {
+    event.preventDefault(); // Evitar comportamiento predeterminado
+    const paymentMethodSelect = document.querySelector('#payment-method');
+    const paymentMethod = paymentMethodSelect.value; // Obtener el valor del medio de pago seleccionado
+    const paymentMethodError = document.querySelector('#payment-method-error');
+
+    if (!paymentMethod) {
+        paymentMethodError.classList.remove('hidden');
+        return;
+    }
+
+    paymentMethodError.classList.add('hidden');
+    showReceipt(paymentMethod); // Pasar el valor del medio de pago a showReceipt
+});
+
+// Deshabilitar el botón de "Finalizar Pedido" hasta que se seleccione un medio de pago
+const paymentMethodSelect = document.querySelector('#payment-method');
+
+paymentMethodSelect.addEventListener('change', () => {
+    if (paymentMethodSelect.value) {
+        finalizeOrderButton.disabled = false;
+        finalizeOrderButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
+        finalizeOrderButton.classList.add('bg-primary', 'hover:bg-opacity-90');
+    } else {
+        finalizeOrderButton.disabled = true;
+        finalizeOrderButton.classList.remove('bg-primary', 'hover:bg-opacity-90');
+        finalizeOrderButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+    }
+});
+
+// Inicializar el estado del botón al cargar la página
+
+if (!paymentMethodSelect.value) {
+    finalizeOrderButton.disabled = true;
+    finalizeOrderButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+}
+
+// Modificar la función showReceipt para incluir el valor unitario en la tabla
+function showReceipt(paymentMethod = null) {
+    if (currentOrder.length === 0) {
+        alert('No hay productos en el pedido');
+        return;
+    }
+
+    if (!currentTable) {
+        alert('Por favor seleccione una mesa');
+        return;
+    }
+
+    // Mostrar estado de carga
+    finalizeText.classList.add('hidden');
+    finalizeSpinner.classList.remove('hidden');
+
+    // Simular retraso de procesamiento
+    setTimeout(() => {
+        let subtotal = currentOrder.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+        let total = subtotal - (currentOrderDiscount?.amount || 0);
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('es-CO', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        const formattedTime = now.toLocaleTimeString('es-CO', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        }).toUpperCase();
+
+        receiptContent.innerHTML = `
+            <div class="receipt-container">
+                <div class="receipt-header">
+                    <h1 class="receipt-title">BAHIA CHILL</h1>
+                    <div class="receipt-subheader">
+                        <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
+                        <p class="company-info" style="font-size: 12px;">Calle 12, #45-67 Avenida Universitaria, Tunja</p>
+                        <p class="company-info" style="font-size: 12px;">Tel: 3012345678 | bahiachillcafebar@gmail.com</p>
+                        <p class="company-info" style="font-size: 12px;">Resolución Dian 1234567890 del 12/34/5678</p>
+                        <p class="company-info" style="font-size: 12px;">Régimen Simple de Tributación</p>
+                    </div>
+                    <div class="receipt-meta">
+                        <p>${formattedDate} - ${formattedTime}</p>
+                        <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
+                        <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
+                    </div>
+                </div>
+                
+                <table class="w-full mb-4">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-2 text-sm font-medium">Producto</th>
+                            <th class="text-right py-2 text-sm font-medium">Precio Unitario</th>
+                            <th class="text-right py-2 text-sm font-medium">Cant.</th>
+                            <th class="text-right py-2 text-sm font-medium">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${currentOrder.map(item => {
+                            const itemTotal = item.product.price * item.quantity;
+                            return `
+                                <tr>
+                                    <td class="text-left py-2 text-sm">${item.product.name}</td>
+                                    <td class="text-right py-2 text-sm">$${item.product.price.toLocaleString()}</td>
+                                    <td class="text-right py-2 text-sm">${item.quantity}</td>
+                                    <td class="text-right py-2 text-sm">$${itemTotal.toLocaleString()}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+                
+                <div class="border-t border-gray-200 pt-3">
+                    <div class="flex justify-between font-semibold text-lg">
+                        <span>Subtotal:</span>
+                        <span>$${subtotal.toLocaleString('es-CO')}</span>
+                    </div>
+                </div>
+                
+                ${currentOrderDiscount ? `
+                <div class="border-t border-gray-200 pt-3">
+                    <div class="flex justify-between font-semibold text-lg">
+                        <span>Descuento:</span>
+                        <span>-$${currentOrderDiscount.amount.toLocaleString('es-CO')}</span>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="border-t border-gray-200 pt-3">
+                    <div class="flex justify-between font-semibold text-lg">
+                        <span>Total:</span>
+                        <span>$${total.toLocaleString('es-CO')}</span>
+                    </div>
+                </div>
+                
+                ${paymentMethod ? `
+                <div class="mt-4 text-sm text-gray-700">
+                    <p><strong>Medio de Pago:</strong> ${paymentMethod}</p>
+                </div>
+                ` : ''}
+
+                ${(customerName.value || customerId.value || customerContact.value) ? `
+                <div class="mt-6 border-t border-gray-200 pt-4">
+                    <h2 class="text-lg font-semibold mb-2">Datos del Cliente</h2>
+                    ${customerName.value ? `<p class="text-sm mb-1"><span class="font-medium">Nombre:</span> ${customerName.value}</p>` : ''}
+                    ${customerId.value ? `<p class="text-sm mb-1"><span class="font-medium">${customerIdType.options[customerIdType.selectedIndex].text}:</span> ${customerId.value}</p>` : ''}
+                    ${customerContact.value ? `<p class="text-sm"><span class="font-medium">Contacto:</span> ${customerContact.value}</p>` : ''}
+                </div>
+                ` : ''}
+                
+                <div class="receipt-footer">
+                    <p class="footer-text"><strong>Sistema de facturación de Bahia Chill ®</strong><br><strong>Todos los derechos reservados</strong></p>
+                </div>
+            </div>
+        `;
+        
+        // Mostrar el modal del recibo
+        receiptModal.classList.remove('hidden');
+        
+        // Ocultar estado de carga
+        finalizeText.classList.remove('hidden');
+        finalizeSpinner.classList.add('hidden');
+    }, 800);
+}
+
+// Crear el botón "Descuento"
+const discountButton = document.createElement('button');
+discountButton.textContent = 'Descuento';
+discountButton.className = 'bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4';
+discountButton.addEventListener('click', showDiscount);
+
+// Insertar el botón "Descuento" encima de "Limpiar Pedido"
+const clearOrderButton = document.querySelector('#clear-order-btn');
+clearOrderButton.parentNode.insertBefore(discountButton, clearOrderButton);
+
+// Ajusté la función de descuento para que se guíe exclusivamente por el valor en $ y el % se adapte automáticamente con decimales.
+function showDiscount() {
+    // Crear el modal de descuento
+    const discountModal = document.createElement('div');
+    discountModal.id = 'discount-modal';
+    discountModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+
+    discountModal.innerHTML = `
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-lg font-bold mb-4">Aplicar Descuento</h2>
+            <label for="discount-reason" class="block text-sm font-medium text-gray-700 mb-2">Motivo del descuento</label>
+            <textarea id="discount-reason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mb-4" rows="3" required></textarea>
+
+            <label for="discount-amount" class="block text-sm font-medium text-gray-700 mb-2">Descuento en $</label>
+            <input id="discount-amount" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mb-4" placeholder="$">
+
+            <label for="discount-percentage" class="block text-sm font-medium text-gray-700 mb-2">Descuento en %</label>
+            <input id="discount-percentage" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mb-4" placeholder="%">
+
+            <div class="flex justify-end space-x-4">
+                <button id="apply-discount-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Aplicar</button>
+                <button id="cancel-discount-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded">Cancelar</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(discountModal);
+
+    // Sincronizar los campos de cantidad y porcentaje
+    const discountAmountInput = document.getElementById('discount-amount');
+    const discountPercentageInput = document.getElementById('discount-percentage');
+
+    discountPercentageInput.addEventListener('input', () => {
+        const rawValue = discountPercentageInput.value.replace(/[^0-9.]/g, '');
+        const percentage = parseFloat(rawValue);
+        if (!isNaN(percentage)) {
+            const total = currentOrder.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+            const amount = (percentage / 100) * total;
+
+            // Actualizar el monto en $
+            discountAmountInput.value = Math.round(amount).toLocaleString('es-CO');
+        } else {
+            // Limpiar el campo de monto si el porcentaje no es válido
+            discountAmountInput.value = '';
+        }
+    });
+
+    discountAmountInput.addEventListener('input', () => {
+        const rawValue = discountAmountInput.value.replace(/[^0-9]/g, '');
+        const amount = parseFloat(rawValue);
+        if (!isNaN(amount)) {
+            const total = currentOrder.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+            const percentage = (amount / total) * 100;
+
+            // Actualizar el porcentaje sin modificar el formato del usuario
+            discountPercentageInput.value = percentage.toFixed(2);
+
+            // Formatear automáticamente con puntos
+            discountAmountInput.value = amount.toLocaleString('es-CO');
+        } else {
+            // Limpiar el campo de porcentaje si el monto no es válido
+            discountPercentageInput.value = '';
+        }
+    });
+
+    // Manejar el botón "Cancelar"
+    const cancelDiscountButton = document.getElementById('cancel-discount-btn');
+    cancelDiscountButton.addEventListener('click', () => {
+        document.body.removeChild(discountModal);
+    });
+
+    // Manejar el botón "Aplicar"
+    const applyDiscountButton = document.getElementById('apply-discount-btn');
+    applyDiscountButton.addEventListener('click', () => {
+        const reason = document.getElementById('discount-reason').value.trim();
+        const rawValue = discountAmountInput.value.replace(/[^0-9]/g, '');
+        const amount = parseFloat(rawValue);
+
+        if (!reason) {
+            alert('El motivo del descuento es obligatorio.');
+            return;
+        }
+
+        if (isNaN(amount) || amount <= 0) {
+            alert('Por favor ingrese un valor de descuento válido en $.');
+            return;
+        }
+
+        const total = currentOrder.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+        if (amount > total) {
+            alert('El descuento no puede ser mayor que el total de la factura.');
+            return;
+        }
+
+        // Actualizar el resumen del pedido
+        const discountedTotal = total - amount;
+        totalSpan.textContent = `$${discountedTotal.toLocaleString('es-CO')}`;
+
+        // Guardar el descuento para usarlo en showReceipt y en el resumen
+        currentOrderDiscount = {
+            reason,
+            amount
+        };
+
+        // Mostrar el descuento en el resumen del pedido
+        const discountSummary = document.getElementById('discount-summary');
+        if (!discountSummary) {
+            const discountElement = document.createElement('div');
+            discountElement.id = 'discount-summary';
+            discountElement.className = 'text-sm text-gray-700 mt-2';
+            discountElement.innerHTML = `<p><strong>Descuento:</strong> -$${amount.toLocaleString('es-CO')} (${reason})</p>`;
+            totalSpan.parentNode.insertBefore(discountElement, totalSpan);
+        } else {
+            discountSummary.innerHTML = `<p><strong>Descuento:</strong> -$${amount.toLocaleString('es-CO')} (${reason})</p>`;
+        }
+
+        document.body.removeChild(discountModal);
+    });
+}
+
+// Modifiqué showReceipt para incluir el descuento en el recibo
+function showReceipt(paymentMethod = null) {
+    if (currentOrder.length === 0) {
+        alert('No hay productos en el pedido');
+        return;
+    }
+
+    if (!currentTable) {
+        alert('Por favor seleccione una mesa');
+        return;
+    }
+
+    // Mostrar estado de carga
+    finalizeText.classList.add('hidden');
+    finalizeSpinner.classList.remove('hidden');
+
+    // Simular retraso de procesamiento
+    setTimeout(() => {
+        let subtotal = currentOrder.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+        let total = subtotal - (currentOrderDiscount?.amount || 0);
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('es-CO', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        const formattedTime = now.toLocaleTimeString('es-CO', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        }).toUpperCase();
+
+        receiptContent.innerHTML = `
+            <div class="receipt-container">
+                <div class="receipt-header">
+                    <h1 class="receipt-title">BAHIA CHILL</h1>
+                    <div class="receipt-subheader">
+                        <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
+                        <p class="company-info" style="font-size: 12px;">Calle 12, #45-67 Avenida Universitaria, Tunja</p>
+                        <p class="company-info" style="font-size: 12px;">Tel: 3012345678 | bahiachillcafebar@gmail.com</p>
+                        <p class="company-info" style="font-size: 12px;">Resolución Dian 1234567890 del 12/34/5678</p>
+                        <p class="company-info" style="font-size: 12px;">Régimen Simple de Tributación</p>
+                    </div>
+                    <div class="receipt-meta">
+                        <p>${formattedDate} - ${formattedTime}</p>
+                        <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
+                        <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
+                    </div>
+                </div>
+                
+                <table class="w-full mb-4">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-2 text-sm font-medium">Producto</th>
+                            <th class="text-right py-2 text-sm font-medium">Precio Unitario</th>
+                            <th class="text-right py-2 text-sm font-medium">Cant.</th>
+                            <th class="text-right py-2 text-sm font-medium">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${currentOrder.map(item => {
+                            const itemTotal = item.product.price * item.quantity;
+                            return `
+                                <tr>
+                                    <td class="text-left py-2 text-sm">${item.product.name}</td>
+                                    <td class="text-right py-2 text-sm">$${item.product.price.toLocaleString()}</td>
+                                    <td class="text-right py-2 text-sm">${item.quantity}</td>
+                                    <td class="text-right py-2 text-sm">$${itemTotal.toLocaleString()}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+                
+                <div class="border-t border-gray-200 pt-3">
+                    <div class="flex justify-between font-semibold text-lg">
+                        <span>Subtotal:</span>
+                        <span>$${subtotal.toLocaleString('es-CO')}</span>
+                    </div>
+                </div>
+                
+                ${currentOrderDiscount ? `
+                <div class="border-t border-gray-200 pt-3">
+                    <div class="flex justify-between font-semibold text-lg">
+                        <span>Descuento:</span>
+                        <span>-$${currentOrderDiscount.amount.toLocaleString('es-CO')}</span>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="border-t border-gray-200 pt-3">
+                    <div class="flex justify-between font-semibold text-lg">
+                        <span>Total:</span>
+                        <span>$${total.toLocaleString('es-CO')}</span>
+                    </div>
+                </div>
+                
+                ${paymentMethod ? `
+                <div class="mt-4 text-sm text-gray-700">
+                    <p><strong>Medio de Pago:</strong> ${paymentMethod}</p>
+                </div>
+                ` : ''}
+
+                ${(customerName.value || customerId.value || customerContact.value) ? `
+                <div class="mt-6 border-t border-gray-200 pt-4">
+                    <h2 class="text-lg font-semibold mb-2">Datos del Cliente</h2>
+                    ${customerName.value ? `<p class="text-sm mb-1"><span class="font-medium">Nombre:</span> ${customerName.value}</p>` : ''}
+                    ${customerId.value ? `<p class="text-sm mb-1"><span class="font-medium">${customerIdType.options[customerIdType.selectedIndex].text}:</span> ${customerId.value}</p>` : ''}
+                    ${customerContact.value ? `<p class="text-sm"><span class="font-medium">Contacto:</span> ${customerContact.value}</p>` : ''}
+                </div>
+                ` : ''}
+                
+                <div class="receipt-footer">
+                    <p class="footer-text"><strong>Sistema de facturación de Bahia Chill ®</strong><br><strong>Todos los derechos reservados</strong></p>
+                </div>
+            </div>
+        `;
+        
+        // Mostrar el modal del recibo
+        receiptModal.classList.remove('hidden');
+        
+        // Ocultar estado de carga
+        finalizeText.classList.remove('hidden');
+        finalizeSpinner.classList.add('hidden');
+    }, 800);
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
