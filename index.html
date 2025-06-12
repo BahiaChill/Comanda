@@ -1443,14 +1443,29 @@
         // Clear order
         function clearOrder() {
             if (currentOrder.length === 0) return;
-            
             if (confirm('¿Está seguro de limpiar el pedido actual?')) {
                 orderItems.classList.add('order-item-remove');
-                
                 setTimeout(() => {
                     currentOrder = [];
                     updateOrderSummary();
                     orderItems.classList.remove('order-item-remove');
+                    // Limpiar mesa seleccionada
+                    currentTable = null;
+                    tableSelect.value = '';
+                    currentTableSpan.textContent = '';
+                    // Limpiar descuento
+                    currentOrderDiscount = null;
+                    // Limpiar medio de pago
+                    const paymentMethodSelect = document.getElementById('payment-method') || document.querySelector('#payment-method');
+                    if (paymentMethodSelect) paymentMethodSelect.value = '';
+                    // Limpiar datos del cliente
+                    customerName.value = '';
+                    customerId.value = '';
+                    customerContact.value = '';
+                    if (customerIdType) customerIdType.selectedIndex = 0;
+                    // Limpiar descuento visual en el resumen del pedido
+                    const discountElement = document.getElementById('discount-summary');
+                    if (discountElement) discountElement.innerHTML = '';
                 }, 300);
             }
         }
@@ -1583,7 +1598,7 @@
             }, 800);
         }
         
-        // Show device selection modal
+        // Show device selection
         function showDeviceSelection() {
             deviceModal.classList.remove('hidden');
             selectedDevice = null;
@@ -1832,6 +1847,7 @@ function showDiscount() {
             // Actualizar el monto en $
             discountAmountInput.value = Math.round(amount).toLocaleString('es-CO');
         } else {
+           
             // Limpiar el campo de monto si el porcentaje no es válido
             discountAmountInput.value = '';
         }
