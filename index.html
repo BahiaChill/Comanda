@@ -1122,12 +1122,13 @@
 
         // Handle logout
         function handleLogout() {
-            // Clear all data
+            if (!confirm('¿Está seguro de salir? Se borrarán todos los datos')) return;
+            // Limpiar todos los datos
             currentUser = null;
             currentTable = null;
             currentOrder = [];
-            
-            // Reset form fields
+            currentOrderDiscount = null;
+            // Limpiar campos del formulario
             usernameInput.value = '';
             passwordInput.value = '';
             tableSelect.value = '';
@@ -1135,17 +1136,21 @@
             customerName.value = '';
             customerId.value = '';
             customerContact.value = '';
-            
+            if (customerIdType) customerIdType.selectedIndex = 0;
+            // Limpiar medio de pago
+            const paymentMethodSelect = document.getElementById('payment-method') || document.querySelector('#payment-method');
+            if (paymentMethodSelect) paymentMethodSelect.value = '';
+            // Limpiar descuento visual en el resumen del pedido
+            const discountElement = document.getElementById('discount-summary');
+            if (discountElement) discountElement.innerHTML = '';
             // Reset UI
             loginError.classList.add('hidden');
             updatePasswordDots();
             updateOrderSummary();
-            
-            // Show login screen
+            // Mostrar pantalla de login
             appScreen.classList.add('hidden');
             loginScreen.classList.remove('hidden');
-            
-            // Clear any local storage
+            // Limpiar cualquier almacenamiento local
             localStorage.removeItem('pedidoPendiente');
             sessionStorage.clear();
         }
@@ -1805,6 +1810,23 @@ discountButton.addEventListener('click', showDiscount);
 const clearOrderButton = document.querySelector('#clear-order-btn');
 clearOrderButton.parentNode.insertBefore(discountButton, clearOrderButton);
 
+// Crear el botón "Eliminar"
+const removeDiscountButton = document.createElement('button');
+removeDiscountButton.textContent = 'Eliminar';
+removeDiscountButton.className = 'ml-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200';
+removeDiscountButton.id = 'remove-discount-btn';
+
+// Insertar el botón "Eliminar" junto a "Descuento"
+clearOrderButton.parentNode.insertBefore(removeDiscountButton, clearOrderButton);
+
+// Evento para eliminar el descuento aplicado
+removeDiscountButton.addEventListener('click', () => {
+    currentOrderDiscount = null;
+    const discountElement = document.getElementById('discount-summary');
+    if (discountElement) discountElement.innerHTML = '';
+    updateOrderSummary();
+});
+
 // Ajusté la función de descuento para que se guíe exclusivamente por el valor en $ y el % se adapte automáticamente con decimales.
 function showDiscount() {
     // Crear el modal de descuento
@@ -1833,7 +1855,7 @@ function showDiscount() {
 
     document.body.appendChild(discountModal);
 
-    // Sincronizar los campos de cantidad y porcentaje
+                         // Sincronizar los campos de cantidad y porcentaje
     const discountAmountInput = document.getElementById('discount-amount');
     const discountPercentageInput = document.getElementById('discount-percentage');
 
@@ -1847,7 +1869,6 @@ function showDiscount() {
             // Actualizar el monto en $
             discountAmountInput.value = Math.round(amount).toLocaleString('es-CO');
         } else {
-           
             // Limpiar el campo de monto si el porcentaje no es válido
             discountAmountInput.value = '';
         }
