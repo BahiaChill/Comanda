@@ -831,9 +831,9 @@
                 <button id="print-receipt-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
                     <i class="fas fa-print mr-2"></i>Imprimir
                 </button>
-                <button id="download-receipt-btn" class="pdf-btn px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90 flex items-center justify-center">
-                    <i class="fas fa-download mr-2"></i>
-                    <span class="hidden sm:inline">Descargar PDF</span>
+                <button id="close-receipt-btn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center justify-center">
+                    <i class="fas fa-times mr-2"></i>
+                    <span class="hidden sm:inline">Cerrar</span>
                 </button>
             </div>
         </div>
@@ -979,8 +979,8 @@
         const customerContact = document.getElementById('customer-contact');
         const receiptModal = document.getElementById('receipt-modal');
         const receiptContent = document.getElementById('receipt-content');
-        const downloadReceiptBtn = document.getElementById('download-receipt-btn');
         const printReceiptBtn = document.getElementById('print-receipt-btn');
+        const closeReceiptBtn = document.getElementById('close-receipt-btn');
         const deviceModal = document.getElementById('device-modal');
         const deviceOptions = document.querySelectorAll('.device-option');
         const cancelDeviceBtn = document.getElementById('cancel-device-btn');
@@ -1004,7 +1004,6 @@
             decrementQuantity.addEventListener('click', () => adjustQuantity(-1));
             incrementQuantity.addEventListener('click', () => adjustQuantity(1));
             addToOrderBtn.addEventListener('click', addToOrder);
-            downloadReceiptBtn.addEventListener('click', showDeviceSelection);
             printReceiptBtn.addEventListener('click', printReceipt);
             
             // Device selection
@@ -1590,234 +1589,6 @@
             selectedDevice = null;
         }
 
-        // Download receipt as PDF
-        function downloadReceipt() {
-            if (currentOrder.length === 0) {
-                alert('No hay productos en el pedido para generar el PDF');
-                return;
-            }
-            
-            // Clear any existing timeout
-            if (pdfGenerationTimeout) {
-                clearTimeout(pdfGenerationTimeout);
-            }
-            
-            const { jsPDF } = window.jspdf;
-            
-            // Determine PDF format based on selected device
-            const isMobile = selectedDevice === 'mobile';
-            const pdfFormat = isMobile ? [80, 297] : 'a4'; // Rollo térmico para móvil, A4 para desktop
-            const pdfOrientation = isMobile ? 'portrait' : 'landscape';
-            
-            const pdf = new jsPDF({
-                orientation: pdfOrientation,
-                unit: 'mm',
-                format: pdfFormat
-            });
-            
-            // Create a temporary container for pagination
-            const tempContainer = document.createElement('div');
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.width = isMobile ? '80mm' : '210mm';
-            document.body.appendChild(tempContainer);
-            
-            // Calculate how many products per page
-            const productsPerPage = isMobile ? 25 : 30;
-            const totalPages = Math.ceil(currentOrder.length / productsPerPage);
-            
-            // Show loading state
-            downloadReceiptBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generando...';
-            downloadReceiptBtn.disabled = true;
-            
-            // Set timeout for PDF generation (15 seconds max)
-            pdfGenerationTimeout = setTimeout(() => {
-                downloadReceiptBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar PDF';
-                downloadReceiptBtn.disabled = false;
-                document.body.removeChild(tempContainer);
-                alert('La generación del PDF está tomando más tiempo de lo esperado. Por favor intente nuevamente.');
-            }, 15000);
-            
-            // Generate each page
-            generatePage(0);
-            
-            function generatePage(pageIndex) {
-                const startIndex = pageIndex * productsPerPage;
-                const endIndex = Math.min(startIndex + productsPerPage, currentOrder.length);
-                const pageProducts = currentOrder.slice(startIndex, endIndex);
-                
-                // Calculate total for this page
-                let pageTotal = 0;
-                pageProducts.forEach(item => {
-                    pageTotal += item.product.price * item.quantity;
-                });
-                
-                // Format date and time
-                const now = new Date();
-                const formattedDate = now.toLocaleDateString('es-CO', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
-                
-                const formattedTime = now.toLocaleTimeString('es-CO', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                }).toUpperCase();
-                
-                // Create page content
-                const pageContent = document.createElement('div');
-                pageContent.className = 'receipt-container';
-                pageContent.style.width = isMobile ? '80mm' : '100%';
-                pageContent.style.padding = isMobile ? '5px' : '15px';
-                pageContent.style.fontSize = isMobile ? '10px' : '12px';
-                
-                pageContent.innerHTML = `
-                    <div class="receipt-header">
-                        <h1 class="receipt-title" style="font-size: ${isMobile ? '18px' : '22px'}">BAHIA CHILL</h1>
-                        <div class="receipt-subheader">
-                            <p style="font-size: ${isMobile ? '12px' : '14px'}"
-                                <p class="company-info">Bahia Chill S.A.S | NIT: 123456789-0</p>
-                                <p class="company-info" style="font-size: 12px;">Calle 12, #45-67 Avenida Universitaria, Tunja</p>
-                                <p class="company-info" style="font-size: 12px;">Tel: 3012345678</p>
-                                <p class="company-info" style="font-size: 12px;">bahiachillcafebar@gmail.com</p>
-                        </div>
-                        <div class="receipt-meta">
-                            <p>${formattedDate} - ${formattedTime}</p>
-                            <p><span class="font-medium">Mesa:</span> ${currentTable.label}</p>
-                            <p><span class="font-medium">Atendido por:</span> ${currentUser.username}</p>
-                            ${totalPages > 1 ? `<p><span class="font-medium">Página:</span> ${pageIndex + 1} de ${totalPages}</p>` : ''}
-                        </div>
-                    </div>
-                                        
-                    <table style="width: 100%; margin-bottom: ${isMobile ? '10px' : '15px'};">
-                        <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="text-left py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Producto</th>
-                                <th class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Precio Unitario</th>
-                                <th class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Cant.</th>
-                                <th class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${pageProducts.map(item => `
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-2" style="font-size: ${isMobile ? '10px' : '12px'}">
-                                        ${item.product.name}
-                                        ${item.notes ? `<br><span class="text-xs text-gray-500">${item.notes}</span>` : ''}
-                                    </td>
-                                    <td class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">$${item.product.price.toLocaleString()}</td>
-                                    <td class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">${item.quantity}</td>
-                                    <td class="text-right py-2" style="font-size: ${isMobile ? '10px' : '12px'}">$${(item.product.price * item.quantity).toLocaleString()}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                                        
-                    <div class="border-t border-gray-200 pt-3">
-                        <div class="flex justify-between font-semibold" style="font-size: ${isMobile ? '14px' : '16px'}">
-                            <span>Total ${totalPages > 1 ? `(Página ${pageIndex + 1})` : ''}:</span>
-                            <span>$${pageTotal.toLocaleString()}</span>
-                        </div>
-                    </div>
-                                        
-                    ${pageIndex === totalPages - 1 ? `
-                    ${customerName.value || customerId.value || customerContact.value ? `
-                    <div class="mt-6 border-t border-gray-200 pt-4">
-                        <h2 class="text-lg font-semibold mb-2">Datos del Cliente</h2>
-                        ${customerName.value ? `<p class="text-sm mb-1"><span class="font-medium">Nombre:</span> ${customerName.value}</p>` : ''}
-                        ${customerId.value ? `<p class="text-sm mb-1"><span class="font-medium">${customerIdType.options[customerIdType.selectedIndex].text}:</span> ${customerId.value}</p>` : ''}
-                        ${customerContact.value ? `<p class="text-sm"><span class="font-medium">Contacto:</span> ${customerContact.value}</p>` : ''}
-                    </div>
-                    ` : ''}
-                    
-                    <div class="receipt-footer">
-                        <p class="footer-text"><strong>Sistema de facturación de Bahia Chill ®</strong><br><strong>Todos los derechos reservados</strong></p>
-                    </div>
-                    ` : ''}
-                `;
-                
-                tempContainer.innerHTML = '';
-                tempContainer.appendChild(pageContent);
-                
-                // Convert to canvas
-                html2canvas(pageContent, {
-                    scale: 2,
-                    useCORS: true,
-                    logging: true,
-                    letterRendering: true,
-                    dpi: 300,
-                    width: isMobile ? 300 : 800,
-                    windowWidth: isMobile ? 300 : 800
-                }).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png', 1.0);
-                    const imgProps = pdf.getImageProperties(imgData);
-                    
-                    // Calculate dimensions
-                    let pageWidth, pageHeight;
-                    if (isMobile) {
-                        pageWidth = 80; // Ancho del PDF en mm
-                        pageHeight = (imgProps.height * pageWidth) / imgProps.width;
-                    } else {
-                        // For desktop (A4 landscape)
-                        pageWidth = pdf.internal.pageSize.getWidth() - 30; // Margins
-                        pageHeight = (imgProps.height * pageWidth) / imgProps.width;
-                    }
-                    
-                    // Add page (except first page)
-                    if (pageIndex > 0) {
-                        pdf.addPage();
-                    }
-                    
-                    // Add image to PDF
-                    pdf.addImage(imgData, 'PNG', isMobile ? 0 : 15, isMobile ? 0 : 15, pageWidth, pageHeight);
-                    
-                    // Check if we need to generate more pages
-                    if (pageIndex < totalPages - 1) {
-                        generatePage(pageIndex + 1);
-                    } else {
-                        // Finalize PDF
-                        pdf.setCreator('Bahia Chill SAS');
-                        pdf.setLanguage('es-CO');
-                        pdf.setProperties({
-                            title: `Comanda ${currentTable.label}`,
-                            subject: 'Recibo de pedido',
-                            author: currentUser.username
-                        });
-                        
-                        const fileName = `Comanda_${currentTable.label.replace(' ', '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
-                        pdf.save(fileName);
-                        
-                        // Reset order
-                        currentOrder = [];
-                        updateOrderSummary();
-                        customerName.value = '';
-                        customerId.value = '';
-                        customerContact.value = '';
-                        receiptModal.classList.add('hidden');
-                        
-                        // Reset button
-                        downloadReceiptBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar PDF';
-                        downloadReceiptBtn.disabled = false;
-                        
-                        // Clean up
-                        document.body.removeChild(tempContainer);
-                        clearTimeout(pdfGenerationTimeout);
-                    }
-                }).catch(error => {
-                    console.error('Error generating PDF:', error);
-                    alert('Ocurrió un error al generar el PDF. Por favor intente nuevamente.');
-                    
-                    // Reset button
-                    downloadReceiptBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar PDF';
-                    downloadReceiptBtn.disabled = false;
-                    clearTimeout(pdfGenerationTimeout);
-                    document.body.removeChild(tempContainer);
-                });
-            }
-        }
-        
         // Print receipt
         function printReceipt() {
             window.print();
@@ -1874,11 +1645,11 @@ paymentMethodSelect.addEventListener('change', () => {
     }
 });
 
-// Inicializar el estado del botón al cargar la página
-
-if (!paymentMethodSelect.value) {
-    finalizeOrderButton.disabled = true;
-    finalizeOrderButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+// Inicializar la función de cierre de recibo
+if (closeReceiptBtn) {
+    closeReceiptBtn.addEventListener('click', () => {
+        receiptModal.classList.add('hidden');
+    });
 }
 
 // Modificar la función showReceipt para incluir el valor unitario en la tabla
